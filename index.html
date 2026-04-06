@@ -313,10 +313,28 @@ input[type=range]:disabled{opacity:0.2;}
 </div>
 
 <script>
-  let ownedItems = []; // Liste des objets achetés
+// --- VARIABLES GLOBALES (CRUCIAL) ---
+let bank = 1000; 
+let ownedItems = []; 
+let speedPct = 30;
+let gaugeVal = 0;
+let gPhase = "calm";
+let phase = "betting";
+let result = null;
+let bestBank = 1000;
+let round = 1;
+let history = [];
+let releaseVal = null;
+let pressed = false;
+let unlocked = [];
+let popTimer = null;
 
+const osc = createOsc();
+let rafId = null;
+let lastT = null;
+
+// --- GESTION DES VUES ---
 function showView(view) {
-    // Liste des IDs à masquer/afficher
     const gameElements = [
         document.querySelector('.bank-wrap'),
         document.querySelector('.char-row'),
@@ -328,23 +346,25 @@ function showView(view) {
     ];
 
     if (view === 'game') {
-        gameElements.forEach(el => el.style.display = 'block');
+        gameElements.forEach(el => { if(el) el.style.display = 'block' });
         document.getElementById('view-apt').style.display = 'none';
         document.getElementById('view-shop').style.display = 'none';
     } else {
-        gameElements.forEach(el => el.style.display = 'none');
+        gameElements.forEach(el => { if(el) el.style.display = 'none' });
         document.getElementById('view-apt').style.display = (view === 'apt') ? 'block' : 'none';
         document.getElementById('view-shop').style.display = (view === 'shop') ? 'block' : 'none';
     }
+    updateUI();
 }
 
+// --- BOUTIQUE ET APPARTEMENT ---
 function buyItem(id, price) {
     if (bank >= price) {
         bank -= price;
         ownedItems.push(id);
-        updateUI(); // Pour mettre à jour l'argent affiché
+        updateUI(); 
         renderApartment();
-        alert("Acheté ! Retrouve-le dans ton logis.");
+        alert("ACHAT RÉUSSI ! Objet livré dans ton logis.");
     } else {
         alert("SOLDE INSUFFISANT. Retourne travailler.");
     }
@@ -355,27 +375,37 @@ function renderApartment() {
     layer.innerHTML = "";
     ownedItems.forEach(item => {
         const img = document.createElement('img');
-        img.src = `images/item_${item}.png`;
+        // VÉRIFIE BIEN QUE TES FICHIERS SUR GITHUB ONT CES NOMS EXACTS
+        img.src = `images/item_${item}.png`; 
         img.style.position = "absolute";
-        // On peut définir des positions fixes selon l'objet
-        if(item === 'setup') { img.style.left="20px"; img.style.bottom="20px"; img.style.width="80px"; }
-        if(item === 'canape') { img.style.right="20px"; img.style.bottom="10px"; img.style.width="100px"; }
+        
+        if(item === 'setup') { 
+            img.style.left="20px"; 
+            img.style.bottom="40px"; 
+            img.style.width="120px"; 
+        }
+        if(item === 'canape') { 
+            img.style.right="10px"; 
+            img.style.bottom="20px"; 
+            img.style.width="150px"; 
+        }
         layer.appendChild(img);
     });
 }
+
+// --- RESTE DU MOTEUR DE JEU (FONCTIONS EXISTANTES) ---
 const fmt=n=>{const a=Math.abs(n),s=n<0?"-":"+";return a>=1e6?`${s}$${(a/1e6).toFixed(2)}M`:a>=1e3?`${s}$${(a/1e3).toFixed(1)}K`:`${s}$${a.toFixed(0)}`;};
 const fmtB=n=>n>=1e6?`$${(n/1e6).toFixed(2)}M`:n>=1e3?`$${(n/1e3).toFixed(1)}K`:`$${n.toFixed(0)}`;
 const pick=a=>a[Math.floor(Math.random()*a.length)];
 
-const BOSS_WIN=["Bien joué… pour une fois. Essaie de pas tout perdre demain.","Bravo ! Tu vois, quand tu te concentres tu y arrives. Dommage que ce soit si rare.","Pas mal. Va te chercher un café, t'as l'air épuisé quand même.","Super résultat ! On va fêter ça. Toi t'as une réunion dans 5 min, bonne chance.","Excellent ! C'est ce que je dirais si c'était vraiment normal."];
-const BOSS_LOSE=["Ah… bah. C'est pas grave. Si, un peu quand même. Bon surtout oui.","Intéressant choix. Je comprends pas, mais je respecte l'audace.","C'est de l'expérience. Chère, certes. Mais de l'expérience.","J'aurais pas fait ça. Mais c'est toi le trader. Enfin… 'trader'.","Tu m'avais dit que t'avais un plan. C'était quoi le plan exactement ?"];
-const BOSS_DEAD=["Je vais être honnête : je m'y attendais. Rendez-vous RH lundi.","Liquidé. Tu bats mon record de stagiaire de 2019.","T'as du courage, ça je te l'accorde. Et rien d'autre.","Je vais appeler ta mère pour lui dire que tu vas bien. Financièrement non, mais bien."];
-const BOSS_IDLE=["Prouve-moi que c'était pas un accident.","Le marché attend pas, toi non plus.","T'es là pour quoi exactement ?","Allez on y va. On a pas toute la journée."];
+const BOSS_WIN=["Bien joué… pour une fois.","Bravo ! Tu vois, quand tu te concentres...","Pas mal. Va te chercher un café.","Super résultat !","Excellent !"];
+const BOSS_LOSE=["Ah… bah. C'est pas grave.","Intéressant choix.","C'est de l'expérience.","J'aurais pas fait ça.","C'était quoi le plan ?"];
+const BOSS_DEAD=["Rendez-vous RH lundi.","Liquidé.","T'as du courage...","Je vais appeler ta mère."];
+const BOSS_IDLE=["Prouve-moi que c'était pas un accident.","Le marché n'attend pas.","T'es là pour quoi ?","Allez on y va."];
 const CHAR={idle:"😐",hold:"😰",win:"🤑",lose:"😭",dead:"💀"};
 const ACHIEVEMENTS=[
   {id:"10k",emoji:"💎",label:"PREMIER PALIER",desc:"Atteindre $10 000",check:b=>b>=10000,color:"#FFD700"},
   {id:"50k",emoji:"🚀",label:"EN ORBITE",desc:"Atteindre $50 000",check:b=>b>=50000,color:"#00cfff"},
-  {id:"100k",emoji:"👑",label:"GOLDEN BOY",desc:"Atteindre $100 000",check:b=>b>=100000,color:"#ff9900"},
 ];
 
 function createOsc(){
@@ -388,11 +418,6 @@ function createOsc(){
   };
 }
 
-let bank=1000,speedPct=30,gaugeVal=0,gPhase="calm",phase="betting";
-let result=null,bestBank=1000,round=1,history=[],releaseVal=null,pressed=false,unlocked=[],popTimer=null;
-const osc=createOsc();
-let rafId=null,lastT=null;
-
 const sm=()=>0.3+(speedPct-10)/90*2.7;
 const eb=()=>bank*Math.min(1,(speedPct/100)*sm()*0.8);
 const gc=v=>v>0.5?"#00ff94":v>0?"#aaff44":v>-0.35?"#ffee00":"#ff2251";
@@ -404,23 +429,12 @@ function updateUI(){
   const color=gc(gaugeVal), spColor=sc(), gPos=gaugeVal>=0, pd=gaugeVal*eb();
   const charKey=isD?"dead":isH?"hold":(isR&&result?.won)?"win":(isR&&result&&!result.won)?"lose":"idle";
 
-  // Header
   document.getElementById("bankAmt").textContent=fmtB(bank);
-  document.getElementById("roundInfo").textContent=`ROUND ${round}`;
-  const rec=document.getElementById("bankRecord");
-  if(bestBank>1000){rec.style.display="block";rec.textContent="RECORD "+fmtB(bestBank);}
-  else rec.style.display="none";
-
-  // Char
   const ce=document.getElementById("charEmoji");
   ce.textContent=CHAR[charKey];
   ce.className="char-emoji"+(isH?" bob":"");
 
-  // Boss / market
-  document.getElementById("bossBubble").style.display=(isB||isR||isD)?"block":"none";
-  document.getElementById("marketLbl").style.display=isH?"block":"none";
-
-  // Chart
+  // Chart Logic
   const hint=document.getElementById("chartHint");
   const area=document.getElementById("chartArea");
   const line=document.getElementById("chartLine");
@@ -430,82 +444,33 @@ function updateUI(){
     const pts="M "+history.map((v,i)=>`${(i/(history.length-1))*W},${mid-v*(mid*0.88)}`).join(" L ");
     area.setAttribute("d",pts+` L300,27 L0,27 Z`); area.style.display="block";
     line.setAttribute("d",pts); line.setAttribute("stroke",color);
-    line.style.filter=`drop-shadow(0 0 4px ${color})`; line.style.display="block";
+    line.style.display="block";
     document.getElementById("cgT").setAttribute("stop-color",color);
     document.getElementById("cgB").setAttribute("stop-color",color);
-  } else { area.style.display="none"; line.style.display="none"; }
+  }
 
-  const pl=document.getElementById("phaseLbl");
-  pl.style.display=isH?"block":"none";
-  pl.style.color=gPos?color:"#ff2251";
-  pl.style.animation=gPhase==="fake_pump"?"blink 0.35s linear infinite":"none";
-  pl.textContent=gPhase==="fake_pump"?"⚠ PIÈGE":gPhase==="trap_drop"?"▼ CHUTE":gPhase==="calm"?"◈ CALME":"▲ HAUSSE";
-
-  // Gauge text
+  // Gauge
   const gv=document.getElementById("gaugeVal");
   gv.style.color=gPos?color:"#ff2251";
-  gv.style.textShadow=`0 0 12px ${gPos?color:"#ff2251"}88`;
   gv.textContent=isH?fmt(pd):releaseVal!==null?fmt(result?.delta||0):"———";
-
-  // Gauge bar
   const gf=document.getElementById("gFill");
   gf.style.display=isH?"block":"none";
-  if(isH){gf.style.left=gPos?"50%":`${50-Math.abs(gaugeVal)*50}%`;gf.style.width=`${Math.abs(gaugeVal)*50}%`;gf.style.background=`linear-gradient(${gPos?"to right":"to left"},${color}66,${color})`;gf.style.boxShadow=`0 0 14px ${color}88`;}
-
-  const rf=document.getElementById("gRelFill"),rm=document.getElementById("gMarker"),rll=document.getElementById("relLbl");
-  if(!isH&&releaseVal!==null){
-    rf.style.display="block";rf.style.left=releaseVal>=0?"50%":`${50-Math.abs(releaseVal)*50}%`;rf.style.width=`${Math.abs(releaseVal)*50}%`;rf.style.background=releaseVal>=0?"rgba(0,255,148,0.18)":"rgba(255,34,81,0.18)";
-    rm.style.display="block";rm.style.left=`${50+releaseVal*50}%`;rm.style.background=releaseVal>=0?"#00ff94":"#ff2251";rm.style.boxShadow=`0 0 8px ${releaseVal>=0?"#00ff94":"#ff2251"}`;
-    rll.style.display="block";rll.style.color=releaseVal>=0?"rgba(0,255,148,0.45)":"rgba(255,34,81,0.45)";rll.textContent="↑ lâché ici";
-  } else {rf.style.display="none";rm.style.display="none";rll.style.display="none";}
+  if(isH){gf.style.left=gPos?"50%":`${50-Math.abs(gaugeVal)*50}%`;gf.style.width=`${Math.abs(gaugeVal)*50}%`;gf.style.background=color;}
 
   // Speed
   const sb=document.getElementById("speedBox");
   sb.style.opacity=isH?"0.2":"1";
-  sb.style.border=`1px solid ${spColor}33`;
-  document.getElementById("speedLbl").textContent=rl(); document.getElementById("speedLbl").style.color=spColor;
-  document.getElementById("speedVal").textContent=speedPct+"%"; document.getElementById("speedVal").style.color=spColor;
-  document.getElementById("speedVal").style.textShadow=`0 0 12px ${spColor}88`;
+  document.getElementById("speedLbl").textContent=rl();
+  document.getElementById("speedVal").textContent=speedPct+"%";
   document.getElementById("speedBet").textContent="mise ~"+fmtB(eb());
-  const sl=document.getElementById("speedSlider");
-  sl.disabled=isH;
-  const pct=(speedPct-10)/90*100;
-  sl.style.background=`linear-gradient(to right,${spColor} ${pct}%,rgba(255,255,255,0.09) ${pct}%)`;
-  let dynSt=document.getElementById("dynSt");
-  if(!dynSt){dynSt=document.createElement("style");dynSt.id="dynSt";document.head.appendChild(dynSt);}
-  dynSt.textContent=`input[type=range]::-webkit-slider-thumb{background:${spColor};box-shadow:0 0 10px ${spColor};}`;
-
+  
   // Button
-  document.getElementById("btnWrap").style.display=(isB||isH)?"flex":"none";
-  const btn=document.getElementById("holdBtn");
-  const btnBg=pressed?`radial-gradient(circle at 45% 45%,${isH&&gPos?"#00cc70":"#cc1a40"} 0%,${isH&&gPos?"#006635":"#660d20"} 100%)`:`radial-gradient(circle at 35% 30%,${isH&&gPos?"#00ff94":"#ff2251"} 0%,${isH&&gPos?"#00aa60":"#aa1535"} 60%,${isH&&gPos?"#006635":"#660d20"} 100%)`;
-  const btnSh=pressed?`0 3px 0 ${isH&&gPos?"#004d28":"#4d0a18"},inset 0 2px 8px rgba(0,0,0,0.5)`:`0 8px 0 ${isH&&gPos?"#004d28":"#4d0a18"},0 10px 20px rgba(0,0,0,0.6),inset 0 2px 4px rgba(255,255,255,0.2),0 0 40px ${isH&&gPos?"rgba(0,255,148,0.3)":"rgba(255,34,81,0.2)"}`;
-  btn.style.background=btnBg; btn.style.boxShadow=btnSh;
-  btn.style.transform=pressed?"translateY(5px)":"translateY(0)";
-  btn.style.animation=(!pressed&&!isH)?"btnPulse 2s ease-in-out infinite":"none";
-  document.getElementById("btnTxt").textContent=isH?(gPos?"LÂCHER":"TENIR ?"):"JOUER";
+  const btnTxt = document.getElementById("btnTxt");
+  if(btnTxt) btnTxt.textContent=isH?(gPos?"LÂCHER":"TENIR ?"):"JOUER";
 
   // Result
   const rb=document.getElementById("resultBox");
-  rb.style.display=(isR||isD)&&result?"block":"none";
-  if((isR||isD)&&result){
-    const rc=document.getElementById("resultCard");
-    rc.style.border=`1px solid ${result.won?"rgba(0,255,148,0.2)":"rgba(255,34,81,0.2)"}`;
-    rc.style.background=result.won?"rgba(0,255,148,0.04)":"rgba(255,34,81,0.04)";
-    document.getElementById("resLbl").textContent=result.won?"ENCAISSÉ":"PERDU";
-    const ra=document.getElementById("resAmt");
-    ra.style.color=result.won?"#00ff94":"#ff2251";
-    ra.style.textShadow=`0 0 12px ${result.won?"#00ff94":"#ff2251"}77`;
-    ra.textContent=(result.won?"+":"-")+fmtB(Math.abs(result.delta));
-    document.getElementById("resBank").textContent=fmtB(bank);
-    const dm=document.getElementById("deadMsg");
-    dm.style.display=isD?"block":"none";
-    if(isD)dm.textContent=`LIQUIDÉ — RECORD : ${fmtB(bestBank)}`;
-    const ab=document.getElementById("actionBtn");
-    ab.textContent=isD?"↩  RECOMMENCER":"▶  ROUND SUIVANT";
-    const c="#ff9900";
-    ab.style.cssText=`width:100%;padding:16px 0;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:5px;font-weight:500;border:2px solid ${c}66;background:linear-gradient(180deg,${c}18,${c}08);color:${c};cursor:pointer;border-radius:6px;box-shadow:0 4px 0 ${c}44,0 0 20px ${c}22;display:block;transition:all 0.1s;`;
-  }
+  if(rb) rb.style.display=(isR||isD)&&result?"block":"none";
 }
 
 function startHolding(){
@@ -524,74 +489,35 @@ function startHolding(){
   rafId=requestAnimationFrame(loop);
 }
 
-function stopLoop(){if(rafId){cancelAnimationFrame(rafId);rafId=null;}}
-
 function doRelease(){
   if(phase!=="holding")return;
-  stopLoop();pressed=false;
+  if(rafId) cancelAnimationFrame(rafId);
+  pressed=false;
   releaseVal=gaugeVal;
   const delta=gaugeVal*eb();
-  const nb=Math.max(0,bank+delta);
+  bank=Math.max(0,bank+delta);
+  bestBank=Math.max(bestBank,bank);
   const won=delta>=0;
   result={delta,won};
   document.getElementById("bossText").textContent=pick(won?BOSS_WIN:BOSS_LOSE);
-  // Flash
-  const fl=document.getElementById("flash");
-  fl.style.background=won?"rgba(0,255,148,0.15)":"rgba(255,34,81,0.25)";
-  fl.style.display="block"; fl.style.animation="flashOut 0.5s ease forwards";
-  setTimeout(()=>{fl.style.display="none";fl.style.animation="";},500);
-  if(!won){
-    const pg=document.getElementById("page");
-    pg.style.animation="shake 0.5s ease";
-    setTimeout(()=>{pg.style.animation="";},500);
-  }
-  bank=nb; bestBank=Math.max(bestBank,nb);
-  checkAch(nb);
-  if(nb<=0){phase="dead";document.getElementById("bossText").textContent=pick(BOSS_DEAD);}
-  else phase="result";
+  if(bank<=0) phase="dead"; else phase="result";
   updateUI();
 }
 
 function doAction(){
   if(phase==="dead"){
-    phase="betting";bank=1000;speedPct=30;gaugeVal=0;
-    result=null;round=1;history=[];releaseVal=null;pressed=false;
-    unlocked=[];osc.reset();
-    document.getElementById("speedSlider").value=30;
-    document.getElementById("bossText").textContent="Prouve-moi que c'était pas un accident.";
+    bank=1000;round=1;phase="betting";
   } else {
-    phase="betting";result=null;round++;
-    gaugeVal=0;releaseVal=null;history=[];
-    document.getElementById("bossText").textContent=pick(BOSS_IDLE);
+    phase="betting";round++;
   }
+  result=null;gaugeVal=0;history=[];releaseVal=null;
   updateUI();
 }
 
-function checkAch(nb){
-  ACHIEVEMENTS.forEach(a=>{
-    if(!unlocked.includes(a.id)&&a.check(nb)){
-      unlocked.push(a.id);
-      document.getElementById("achEmoji").textContent=a.emoji;
-      document.getElementById("achLabel").textContent=a.label;
-      document.getElementById("achDesc").textContent=a.desc;
-      document.getElementById("achTag").style.color=a.color;
-      const ai=document.getElementById("achInner");
-      ai.style.border=`2px solid ${a.color}`;
-      ai.style.boxShadow=`0 0 50px ${a.color}99,0 8px 32px rgba(0,0,0,0.9)`;
-      ai.style.background=`linear-gradient(135deg,#1a1200,#2e2000)`;
-      const ad=document.getElementById("achiev");
-      ad.style.display="flex"; ad.style.animation="achSlide 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards";
-      if(popTimer)clearTimeout(popTimer);
-      popTimer=setTimeout(()=>{ad.style.display="none";},3500);
-    }
-  });
-}
-
 document.getElementById("speedSlider").addEventListener("input",function(){speedPct=Number(this.value);updateUI();});
-const btn=document.getElementById("holdBtn");
-btn.addEventListener("pointerdown",e=>{e.preventDefault();startHolding();});
-btn.addEventListener("pointerup",e=>{e.preventDefault();doRelease();});
-btn.addEventListener("pointerleave",e=>{if(phase==="holding"){e.preventDefault();doRelease();}});
+const holdBtn=document.getElementById("holdBtn");
+holdBtn.addEventListener("pointerdown",e=>{e.preventDefault();startHolding();});
+holdBtn.addEventListener("pointerup",e=>{e.preventDefault();doRelease();});
 
 updateUI();
 </script>
