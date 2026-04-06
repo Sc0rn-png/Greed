@@ -105,11 +105,20 @@ body{font-family:'DM Mono',monospace;user-select:none;-webkit-user-select:none;c
     </div>
 </div>
 
-<div style="background:rgba(0,0,0,0.3);padding:15px;border-radius:6px;">
-    <div style="display:flex;justify-content:space-between;margin-bottom:5px;font-size:10px;color:#ff9f1e;">
-        <span>VITESSE</span>
-        <span id="speedDisplay">30%</span>
+<div class="speed-box" id="speedBox">
+    <div class="speed-header">
+      <div>
+        <span class="speed-tag">VITESSE</span>
+        <span class="speed-label" id="speedLbl">SÉCURISÉ</span>
+      </div>
+      <div style="text-align:right;">
+        <span class="speed-val" id="speedVal">30%</span>
+        <span class="speed-bet" id="speedBet">mise ~$240</span>
+      </div>
     </div>
+    <input type="range" id="speedSlider" min="10" max="100" step="5" value="30"/>
+    <div class="speed-footer"><span>LENT</span><span>NORMAL</span><span>RISQUE MAX🔥</span></div>
+  </div>
     
     <input type="range" id="speedSlider" min="10" max="100" step="5" value="30" style="width:100%;accent-color:#ff9f1e;"/>
 </div>
