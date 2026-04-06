@@ -44,6 +44,14 @@
 </head>
 <body>
 
+    <div id="boss-area" style="display:flex; align-items:center; gap:15px; background:rgba(255,160,30,0.05); padding:15px; border-radius:12px; margin-bottom:10px; border:1px solid rgba(255,160,30,0.1);">
+    <div style="font-size:40px;">😐</div>
+    <div style="flex:1;">
+        <div style="font-size:9px; color:#ff9f1e; margin-bottom:4px; opacity:0.7;">M. BERNARD — DG</div>
+        <div id="boss-text" style="font-style:italic; font-size:11px; color:#eee;">"Prouve-moi que c'était pas un accident."</div>
+    </div>
+</div>
+    
 <div class="page">
     <div class="topbar">
         <div class="logo">◈ GREED ◈</div>
@@ -113,6 +121,20 @@
 </div>
 
 <script>
+const bossPhrases = [
+    "Prouve-moi que c'était pas un accident.",
+    "Le marché n'attend pas les faibles.",
+    "J'ai une Rolex à payer, active.",
+    "Ne me fais pas regretter de t'avoir engagé.",
+    "C'est ça que tu appelles du trading ?"
+];
+
+// À ajouter dans ta fonction nextRound() existante :
+function nextRound() {
+    // ... tes lignes actuelles ...
+    document.getElementById("boss-text").textContent = `"${bossPhrases[Math.floor(Math.random()*bossPhrases.length)]}"`;
+    document.querySelector("#boss-area div").textContent = "😐";
+}
 let bank = 1000;
 let speedPct = 30;
 let gaugeVal = 0;
@@ -195,6 +217,48 @@ btn.addEventListener("pointerdown", () => {
         rafId = requestAnimationFrame(loop);
     }
     loop();
+    let startTime = Date.now();
+    let seed = Math.random() * 100; // Pour l'aléatoire
+
+    function loop() {
+        let elapsed = (Date.now() - startTime) / 1000;
+        
+        // --- LA VRAIE LOGIQUE DE COURBE ---
+        // On mélange du Sinus avec du bruit aléatoire basé sur la vitesse
+        let noise = (Math.sin(elapsed * 2) + Math.cos(elapsed * 5 + seed)) * (speedPct / 100);
+        let trend = (elapsed * 0.2) * (speedPct / 50); // La montée de base
+        
+        // Calcul du multiplicateur (peut devenir négatif !)
+        gaugeVal = (noise + trend) - (elapsed * 0.15); 
+
+        // --- AFFICHAGE ---
+        history.push(gaugeVal);
+        if(history.length > 50) history.shift();
+        
+        // Dessin de la courbe
+        const path = document.getElementById("chartLine");
+        let d = history.map((v, i) => `${(i/50)*100},${20 - v*15}`).join(" L ");
+        path.setAttribute("d", "M " + d);
+
+        // Calcul du Profit/Perte réel
+        const currentProfit = gaugeVal * (bank * (speedPct/100));
+        const gV = document.getElementById("gaugeVal");
+        gV.textContent = (currentProfit >= 0 ? "+" : "") + Math.floor(currentProfit);
+        gV.style.color = currentProfit >= 0 ? "#00ff94" : "#ff2251";
+        
+        // Jauge visuelle (Rouge si négatif)
+        const fill = document.getElementById("gFill");
+        fill.style.width = Math.min(100, Math.max(0, 50 + (gaugeVal * 20))) + "%";
+        fill.style.background = currentProfit >= 0 ? "#00ff94" : "#ff2251";
+        
+        // Changement d'humeur du Boss si on perd trop pendant le clic
+        if (currentProfit < -(bank * 0.2)) {
+            document.getElementById("boss-text").textContent = "TU FOUS QUOI ?! ON PERD TOUT !";
+            document.querySelector("#boss-area div").textContent = "🤬";
+        }
+
+        rafId = requestAnimationFrame(loop);
+    }
 });
 
 btn.addEventListener("pointerup", () => {
