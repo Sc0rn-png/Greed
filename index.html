@@ -213,28 +213,6 @@ let history = [];
 let rafId = null;
 let ownedItems = [];
 
-    // Chart
-  const hint=document.getElementById("chartHint");
-  const area=document.getElementById("chartArea");
-  const line=document.getElementById("chartLine");
-  hint.style.display=history.length<2?"block":"none";
-  if(history.length>1){
-    const W=300,mid=27;
-    const pts="M "+history.map((v,i)=>`${(i/(history.length-1))*W},${mid-v*(mid*0.88)}`).join(" L ");
-    area.setAttribute("d",pts+` L300,27 L0,27 Z`); area.style.display="block";
-    line.setAttribute("d",pts); line.setAttribute("stroke",color);
-    line.style.filter=`drop-shadow(0 0 4px ${color})`; line.style.display="block";
-    document.getElementById("cgT").setAttribute("stop-color",color);
-    document.getElementById("cgB").setAttribute("stop-color",color);
-  } else { area.style.display="none"; line.style.display="none"; }
-
-  const pl=document.getElementById("phaseLbl");
-  pl.style.display=isH?"block":"none";
-  pl.style.color=gPos?color:"#ff2251";
-  pl.style.animation=gPhase==="fake_pump"?"blink 0.35s linear infinite":"none";
-  pl.textContent=gPhase==="fake_pump"?"⚠ PIÈGE":gPhase==="trap_drop"?"▼ CHUTE":gPhase==="calm"?"◈ CALME":"▲ HAUSSE";
-
-
 // Met à jour la jauge
 function updateGauge(val){
     const fill = document.getElementById("gaugeFill");
