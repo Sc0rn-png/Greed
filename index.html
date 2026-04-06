@@ -27,9 +27,30 @@
     .boss-bubble{flex:1;background:linear-gradient(135deg,#1a1a2e,#16213e);border:1px solid rgba(255,180,0,0.25);border-radius:0 12px 12px 12px;padding:10px;font-size:11px;color:rgba(255,220,100,0.9);font-style:italic;}
 
     /* CHART SYSTEM */
-    .chart-box{background:rgba(0,0,0,0.4);border:1px solid rgba(255,160,30,0.15);border-radius:6px;height:100px;position:relative;overflow:hidden;}
-    .chart-live{position:absolute;top:5px;right:8px;font-size:8px;color:rgba(255,160,30,0.4);letter-spacing:2px;}
-    .phase-lbl{position:absolute;top:5px;left:8px;font-size:8px;letter-spacing:2px;color:#ff9f1e;}
+    .chart-box {
+    background: rgba(0,0,0,0.4);
+    border: 1px solid rgba(255,160,30,0.15);
+    border-radius: 6px;
+    position: relative;
+    overflow: hidden;
+    padding: 10px 0;
+}
+.chart-midline {
+    position: absolute;
+    top: 50%; left: 0; right: 0;
+    height: 1px;
+    background: rgba(255,255,255,0.06);
+    z-index: 1;
+}
+/* Animation du label de phase (clignotement en cas de piège) */
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.2; } }
+.phase-lbl {
+    position: absolute;
+    top: 5px; left: 8px;
+    font-size: 8px;
+    letter-spacing: 2px;
+    z-index: 2;
+}
 
     /* GAUGE */
     .gauge-container{margin-top:10px;}
@@ -79,12 +100,20 @@
         </div>
 
         <div class="chart-box">
-            <div class="phase-lbl" id="phaseLbl">CALME</div>
-            <div class="chart-live">LIVE</div>
-            <svg width="100%" height="100%" viewBox="0 0 100 40" preserveAspectRatio="none">
-                <path id="chartLine" d="" fill="none" stroke="#ff9f1e" stroke-width="1.5" />
-            </svg>
-        </div>
+    <div class="chart-midline"></div>
+    <svg id="chartSvg" width="100%" viewBox="0 0 300 55" preserveAspectRatio="none" style="display:block;height:80px;">
+        <defs>
+            <linearGradient id="cg" x1="0" y1="0" x2="0" y2="1">
+                <stop id="cgT" offset="0%" stop-color="#00ff94" stop-opacity="0.4"/>
+                <stop id="cgB" offset="100%" stop-color="#00ff94" stop-opacity="0.02"/>
+            </linearGradient>
+        </defs>
+        <path id="chartArea" d="" fill="url(#cg)" />
+        <path id="chartLine" d="" fill="none" stroke-width="2.5" stroke-linejoin="round" />
+    </svg>
+    <div class="phase-lbl" id="phaseLbl"></div>
+    <div class="chart-live">LIVE</div>
+</div>
 
         <div class="gauge-container">
             <div class="gauge-header">
@@ -142,11 +171,13 @@
 let bank = 1000;
 let speedPct = 30;
 let gaugeVal = 0;
+let gPhase = "calm"; // Ajouté pour la charte
 let phase = "betting";
 let history = [];
+let lastT = null;    // Ajouté pour le calcul du temps
 let rafId = null;
-let ownedItems = [];
-
+const osc = createOsc(); // Ta fonction createOsc() doit être définie
+    
 // 1. LOGIQUE DE L'OSCILLATEUR (LA COURBE)
 function createOsc() {
     const phases = [
@@ -222,6 +253,10 @@ btn.addEventListener("pointerdown", (e) => {
     
     let lastTime = performance.now();
     function loop(t) {
+        const { value, phase } = osc.tick(dt, sm());
+    
+    history.push(value);
+    if(history.length > 80) history.shift();
         let dt = t - lastTime;
         lastTime = t;
         const speedMult = 0.5 + (speedPct / 50);
@@ -250,19 +285,55 @@ btn.addEventListener("pointerdown", (e) => {
     rafId = requestAnimationFrame(loop);
 });
 
-btn.addEventListener("pointerup", () => {
-    if (phase !== "holding") return;
-    cancelAnimationFrame(rafId);
-    phase = "result";
-    const profit = gaugeVal * (bank * (speedPct / 100));
-    bank += profit;
+btn.addEventListener("pointerdown", (e) => {
+    e.preventDefault();
+    if (phase !== "betting") return;
+
+    // Initialisation
+    phase = "holding";
+    osc.reset();
+    history = [];
+    lastT = performance.now(); 
     
-    document.getElementById("gameControls").style.display = "none";
-    document.getElementById("resultBox").style.display = "block";
-    document.getElementById("resAmt").textContent = (profit >= 0 ? "+$" : "-$") + Math.abs(Math.floor(profit));
-    document.getElementById("resAmt").style.color = profit >= 0 ? "#00ff94" : "#ff2251";
-    document.getElementById("charEmoji").textContent = profit >= 0 ? "🤑" : "😭";
-    updateUI();
+    // UI du bouton
+    btn.textContent = "ENCAISSER";
+    btn.style.background = "radial-gradient(circle, #00ff94, #008855)";
+
+    // LA FONCTION LOOP
+    function loop(t) {
+        if (!lastT) lastT = t;
+        const dt = t - lastT;
+        lastT = t;
+
+        // 1. On fait avancer l'oscillateur
+        const sm = 0.3 + (speedPct - 10) / 90 * 2.7; // Calcul du multiplicateur de vitesse
+        const res = osc.tick(dt, sm);
+        
+        gaugeVal = res.value;
+        gPhase = res.phase;
+
+        // 2. On met à jour l'historique (max 80 points pour la fluidité)
+        history.push(gaugeVal);
+        if (history.length > 80) history.shift();
+
+        // 3. ON APPELLE LA BELLE CHARTE (La fonction que je t'ai donnée avant)
+        updateChartDrawing(gaugeVal, gPhase);
+
+        // 4. Mise à jour des textes de gains (Gauge)
+        const riskAmount = bank * (speedPct / 100) * 0.8;
+        const currentProfit = gaugeVal * riskAmount;
+        const gv = document.getElementById("gaugeVal");
+        gv.textContent = (currentProfit >= 0 ? "+$" : "-$") + Math.abs(Math.floor(currentProfit));
+        gv.style.color = gaugeVal >= 0 ? "#00ff94" : "#ff2251";
+
+        // 5. On continue la boucle
+        if (phase === "holding") {
+            rafId = requestAnimationFrame(loop);
+        }
+    }
+
+    // On lance la boucle
+    rafId = requestAnimationFrame(loop);
 });
 
 function nextRound() {
@@ -288,6 +359,11 @@ document.getElementById("speedSlider").addEventListener("input", function() {
     speedPct = this.value;
     updateUI();
 });
+
+updateChartDrawing(value, phase);
+    
+    rafId = requestAnimationFrame(loop);
+}
 
 updateUI();
 </script>
