@@ -7,53 +7,39 @@
     <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
     <style>
         *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-        html,body{height:100%;background:#0d0a06;overflow-x:hidden;color: #fff;}
-        body{font-family:'DM Mono',monospace;user-select:none;-webkit-user-select:none;}
-
-        /* Animations */
-        @keyframes blink{0%,100%{opacity:1}50%{opacity:0.15}}
-        @keyframes slideUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
-
-        /* Layout */
-        .page{width:100%; max-width:480px; margin:0 auto; padding:20px; display:flex; flex-direction:column; gap:12px;}
+        html,body{height:100%;background:#0d0a06;overflow-x:hidden;color: #fff;font-family:'DM Mono',monospace;}
+        .page{width:100%; max-width:480px; margin:0 auto; padding:20px; display:flex; flex-direction:column; gap:15px;}
         
+        /* Header & Nav */
         .topbar{display:flex; justify-content:space-between; align-items:center; padding-bottom:12px; border-bottom:1px solid rgba(255,160,30,0.2);}
         .logo{font-size:11px; letter-spacing:6px; color:rgba(255,160,30,0.7); font-weight:500;}
-        
-        .nav-btn {background:rgba(255,160,30,0.1); border:1px solid rgba(255,160,30,0.3); color:#ff9f1e; font-size:8px; padding:6px 10px; border-radius:4px; cursor:pointer;}
+        .nav-btn {background:rgba(255,160,30,0.1); border:1px solid rgba(255,160,30,0.3); color:#ff9f1e; font-size:9px; padding:6px 10px; border-radius:4px; cursor:pointer;}
 
         /* Banque */
-        .bank-wrap{text-align:center; padding:10px 0;}
-        .bank-amount{font-size:48px; font-weight:300; letter-spacing:-1px; color:#fff;}
+        .bank-wrap{text-align:center; padding:15px 0;}
+        .bank-amount{font-size:45px; font-weight:300; letter-spacing:-1px;}
 
-        /* Vues Sub */
-        .sub-view { display:none; animation: slideUp 0.3s ease; padding-top: 10px; }
-        .back-btn { width: 100%; margin-top: 20px; background: #333; color: #fff; border: none; padding: 12px; border-radius: 6px; font-family: inherit; font-size: 10px; letter-spacing: 2px; }
+        /* Vues */
+        .sub-view { display:none; animation: slideUp 0.3s ease; }
+        .back-btn { width: 100%; margin-top: 20px; background: #222; color: #ff9f1e; border: 1px solid #ff9f1e; padding: 12px; border-radius: 6px; cursor:pointer; font-family: inherit;}
 
-        /* Boutique */
+        /* Shop & Apt */
         .shop-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .shop-item { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 15px; text-align: center; border-radius: 8px; }
-        .shop-item img { width: 60px; height: 60px; object-fit: contain; margin-bottom: 10px; }
-        .shop-item span { font-size: 10px; display: block; margin-bottom: 8px; color: #aaa; }
-        .buy-btn { background: #ff9f1e; border: none; color: #000; font-weight: bold; padding: 6px 12px; border-radius: 4px; width: 100%; }
+        .shop-item img { width: 100%; max-width: 60px; height: 60px; object-fit: contain; margin-bottom: 10px; }
+        .buy-btn { background: #ff9f1e; border: none; color: #000; font-weight: bold; padding: 8px; border-radius: 4px; width: 100%; cursor:pointer;}
+        .apt-room { width: 100%; height: 200px; background: #000; border: 1px solid #ff9f1e; position: relative; border-radius: 8px; overflow: hidden; }
+        .apt-bg { width: 100%; height: 100%; object-fit: cover; opacity: 0.4; }
 
-        /* Appartement */
-        .apt-room { width: 100%; height: 220px; background: #000; border: 1px solid #ff9f1e; position: relative; border-radius: 8px; overflow: hidden; }
-        .apt-bg { width: 100%; height: 100%; object-fit: cover; opacity: 0.5; }
+        /* Game Elements */
+        .chart-box{background:rgba(0,0,0,0.4); border:1px solid rgba(255,160,30,0.15); border-radius:6px; height:80px; position:relative; overflow:hidden;}
+        .gauge-track{height:12px; background:rgba(0,0,0,0.5); border-radius:6px; position:relative; overflow:hidden; border:1px solid rgba(255,160,30,0.15); margin: 10px 0;}
+        .gauge-fill{position:absolute; height:100%; width: 0%; transition: width 0.1s;}
+        .gauge-val{font-size:22px; font-weight:500; text-align: right; height: 30px;}
+        input[type=range]{width:100%; height:6px; -webkit-appearance:none; background:#333; border-radius:3px; margin: 15px 0;}
+        input[type=range]::-webkit-slider-thumb{-webkit-appearance:none; width:18px; height:18px; border-radius:50%; background:#ff9f1e; box-shadow: 0 0 10px #ff9f1e;}
 
-        /* Jeu (Charts/Gauges) */
-        .chart-box{background:rgba(0,0,0,0.4); border:1px solid rgba(255,160,30,0.15); border-radius:6px; padding:10px; position:relative; min-height:80px;}
-        .gauge-track{height:16px; background:rgba(0,0,0,0.5); border-radius:8px; position:relative; overflow:hidden; border:1px solid rgba(255,160,30,0.15); margin: 10px 0;}
-        .gauge-fill{position:absolute; height:100%; border-radius:8px; transition: width 0.1s;}
-        .gauge-val{font-size:24px; font-weight:500; text-align: right;}
-
-        .speed-box{background:rgba(0,0,0,0.3); border:1px solid rgba(255,160,30,0.1); border-radius:8px; padding:15px;}
-        input[type=range]{width:100%; height:6px; -webkit-appearance:none; background:#222; border-radius:3px; margin: 15px 0;}
-        input[type=range]::-webkit-slider-thumb{-webkit-appearance:none; width:20px; height:20px; border-radius:50%; background:#ff9f1e;}
-
-        /* Bouton Action */
-        .btn-wrap{display:flex; justify-content:center; padding:20px 0;}
-        #holdBtn{width:120px; height:120px; border-radius:50%; border:none; color:#fff; font-weight:bold; font-family:inherit; cursor:pointer; font-size: 12px; letter-spacing: 2px;}
+        @keyframes slideUp{from{opacity:0; transform:translateY(10px)}to{opacity:1; transform:translateY(0)}}
     </style>
 </head>
 <body>
@@ -73,47 +59,44 @@
 
     <div id="view-game">
         <div class="chart-box">
-            <svg id="chartSvg" width="100%" height="60" style="display:block;">
-                <path id="chartLine" d="" fill="none" stroke="#00ff94" stroke-width="2"/>
+            <svg width="100%" height="100%" viewBox="0 0 100 40" preserveAspectRatio="none">
+                <path id="chartLine" d="" fill="none" stroke="#ff9f1e" stroke-width="1"/>
             </svg>
-            <div id="marketLbl" style="position:absolute; top:5px; right:10px; font-size:8px; color:#ff9f1e; animation:blink 1s infinite; display:none;">MARCHÉ EN COURS...</div>
         </div>
 
-        <div class="gauge-section">
+        <div class="gauge-section" style="margin-top:10px;">
             <div class="gauge-val" id="gaugeVal">———</div>
-            <div class="gauge-track">
-                <div class="gauge-fill" id="gFill"></div>
-            </div>
+            <div class="gauge-track"><div class="gauge-fill" id="gFill"></div></div>
         </div>
 
-        <div class="speed-box">
-            <div style="display:flex; justify-content:space-between; font-size:10px;">
+        <div style="background:rgba(255,255,255,0.03); padding:15px; border-radius:8px;">
+            <div style="display:flex; justify-content:space-between; font-size:9px; letter-spacing:1px;">
                 <span id="speedLbl" style="color:#00ff94">SÉCURISÉ</span>
                 <span id="speedVal">30%</span>
             </div>
             <input type="range" id="speedSlider" min="10" max="100" step="5" value="30"/>
         </div>
 
-        <div class="btn-wrap" id="btnWrap">
-            <button id="holdBtn" style="background: radial-gradient(circle, #ff2251, #aa1535);">JOUER</button>
+        <div style="text-align:center; padding:20px 0;" id="gameControls">
+            <button id="holdBtn" style="width:110px; height:110px; border-radius:50%; border:none; background: radial-gradient(circle, #ff2251, #aa1535); color:#fff; font-weight:bold; font-family:inherit; cursor:pointer; box-shadow: 0 6px 0 #660d20;">JOUER</button>
         </div>
 
         <div id="resultBox" style="display:none; text-align:center;">
-            <div id="resAmt" style="font-size:32px; margin-bottom:10px;">+0</div>
-            <button class="back-btn" onclick="nextRound()" style="background:#ff9f1e; color:#000;">ROUND SUIVANT</button>
+            <div id="resAmt" style="font-size:28px; margin-bottom:10px;">+0</div>
+            <button class="back-btn" onclick="nextRound()" style="background:#ff9f1e; color:#000; border:none;">CONTINUER</button>
         </div>
     </div>
 
     <div id="view-shop" class="sub-view">
         <div class="shop-grid">
             <div class="shop-item">
-                <img src="images/item_setup.png" onerror="this.src='https://via.placeholder.com/60?text=PC'">
-                <span>PC GAMER</span>
+                <img src="images/item_setup.png" onerror="this.src='https://via.placeholder.com/60/222/ff9f1e?text=PC'">
+                <span style="display:block; font-size:10px; margin-bottom:5px;">PC GAMER</span>
                 <button class="buy-btn" onclick="buyItem('setup', 2500)">$2.5K</button>
             </div>
             <div class="shop-item">
-                <img src="images/item_canape.png" onerror="this.src='https://via.placeholder.com/60?text=SOFA'">
-                <span>CANAPÉ</span>
+                <img src="images/item_canape.png" onerror="this.src='https://via.placeholder.com/60/222/ff9f1e?text=SOFA'">
+                <span style="display:block; font-size:10px; margin-bottom:5px;">CANAPÉ</span>
                 <button class="buy-btn" onclick="buyItem('canape', 5000)">$5K</button>
             </div>
         </div>
@@ -125,7 +108,6 @@
             <img src="images/appart_vide.png" class="apt-bg" onerror="this.style.background='#111'">
             <div id="apt-items-layer"></div>
         </div>
-        <div style="padding:15px; font-size:10px; color:#ff9f1e;">LOGEMENT ACTUEL : STUDIO ÉCO</div>
         <button class="back-btn" onclick="showView('game')">↩ RETOUR AU BUREAU</button>
     </div>
 </div>
@@ -134,28 +116,26 @@
 let bank = 1000;
 let speedPct = 30;
 let gaugeVal = 0;
-let phase = "betting"; 
+let phase = "betting";
 let history = [];
 let rafId = null;
 let ownedItems = [];
 
-// NAVIGATION
 function showView(v) {
     document.getElementById('view-game').style.display = (v === 'game') ? 'block' : 'none';
     document.getElementById('view-shop').style.display = (v === 'shop') ? 'block' : 'none';
     document.getElementById('view-apt').style.display = (v === 'apt') ? 'block' : 'none';
 }
 
-// BOUTIQUE
 function buyItem(id, price) {
     if (bank >= price) {
         bank -= price;
         ownedItems.push(id);
         updateUI();
         renderApartment();
-        alert("ACHAT EFFECTUÉ !");
+        alert("ACHETÉ !");
     } else {
-        alert("FONDS INSUFFISANTS !");
+        alert("SOLDE INSUFFISANT");
     }
 }
 
@@ -166,102 +146,81 @@ function renderApartment() {
         const img = document.createElement('img');
         img.src = `images/item_${item}.png`;
         img.style.position = "absolute";
-        img.style.width = "70px";
+        img.style.width = "60px";
         if(item === 'setup') { img.style.bottom = "20px"; img.style.left = "20px"; }
         if(item === 'canape') { img.style.bottom = "10px"; img.style.right = "20px"; }
         layer.appendChild(img);
     });
 }
 
-// LOGIQUE JEU
-const slider = document.getElementById("speedSlider");
-slider.addEventListener("input", () => {
-    speedPct = slider.value;
+document.getElementById("speedSlider").addEventListener("input", function() {
+    speedPct = this.value;
     updateUI();
 });
 
 function updateUI() {
     document.getElementById("bankAmt").textContent = `$${Math.floor(bank).toLocaleString()}`;
     document.getElementById("speedVal").textContent = speedPct + "%";
-    
-    const color = speedPct < 40 ? "#00ff94" : speedPct < 75 ? "#ff9f1e" : "#ff2251";
-    document.getElementById("speedLbl").textContent = speedPct < 40 ? "SÉCURISÉ" : speedPct < 75 ? "RISQUÉ" : "YOLO 🔥";
-    document.getElementById("speedLbl").style.color = color;
+    const lbl = document.getElementById("speedLbl");
+    lbl.textContent = speedPct < 40 ? "SÉCURISÉ" : speedPct < 75 ? "RISQUÉ" : "YOLO 🔥";
+    lbl.style.color = speedPct < 40 ? "#00ff94" : speedPct < 75 ? "#ff9f1e" : "#ff2251";
 }
 
 const btn = document.getElementById("holdBtn");
-btn.addEventListener("pointerdown", startPlay);
-btn.addEventListener("pointerup", stopPlay);
-
-function startPlay() {
+btn.addEventListener("pointerdown", () => {
     if (phase !== "betting") return;
     phase = "holding";
     history = [];
-    document.getElementById("marketLbl").style.display = "block";
-    btn.textContent = "LÂCHER !";
+    btn.textContent = "ENCAISSER";
     btn.style.background = "radial-gradient(circle, #00ff94, #008855)";
+    btn.style.boxShadow = "0 6px 0 #004422";
     
     let startTime = Date.now();
     function loop() {
         let elapsed = (Date.now() - startTime) / 1000;
-        // Simulation de courbe
-        gaugeVal = Math.sin(elapsed * (speedPct/10)) * (speedPct/50) + (elapsed * 0.1);
+        gaugeVal = Math.sin(elapsed * (speedPct/8)) * (speedPct/40) + (elapsed * 0.05);
         
-        // Update Graph & Gauge
-        drawChart();
-        const displayVal = gaugeVal * (bank * (speedPct/100));
-        const gV = document.getElementById("gaugeVal");
-        gV.textContent = (displayVal >= 0 ? "+" : "") + Math.floor(displayVal);
-        gV.style.color = displayVal >= 0 ? "#00ff94" : "#ff2251";
-        
-        const fill = document.getElementById("gFill");
-        const visualWidth = Math.min(100, Math.max(0, 50 + (gaugeVal * 20)));
-        fill.style.width = visualWidth + "%";
-        fill.style.background = displayVal >= 0 ? "#00ff94" : "#ff2251";
+        history.push(gaugeVal);
+        if(history.length > 50) history.shift();
+        document.getElementById("chartLine").setAttribute("d", "M " + history.map((v,i) => `${(i/50)*100},${20 - v*10}`).join(" L "));
 
+        const currentProfit = gaugeVal * (bank * (speedPct/100));
+        const gV = document.getElementById("gaugeVal");
+        gV.textContent = (currentProfit >= 0 ? "+" : "") + Math.floor(currentProfit);
+        gV.style.color = currentProfit >= 0 ? "#00ff94" : "#ff2251";
+        
+        document.getElementById("gFill").style.width = Math.min(100, Math.max(0, 50 + (gaugeVal * 25))) + "%";
+        document.getElementById("gFill").style.background = currentProfit >= 0 ? "#00ff94" : "#ff2251";
+        
         rafId = requestAnimationFrame(loop);
     }
     loop();
-}
+});
 
-function stopPlay() {
+btn.addEventListener("pointerup", () => {
     if (phase !== "holding") return;
     cancelAnimationFrame(rafId);
     phase = "result";
-    
     const profit = gaugeVal * (bank * (speedPct/100));
     bank += profit;
-    if (bank < 0) bank = 0;
-
-    document.getElementById("btnWrap").style.display = "none";
-    document.getElementById("marketLbl").style.display = "none";
+    if(bank < 0) bank = 0;
+    
+    document.getElementById("gameControls").style.display = "none";
     document.getElementById("resultBox").style.display = "block";
-    const res = document.getElementById("resAmt");
-    res.textContent = (profit >= 0 ? "+" : "") + Math.floor(profit);
-    res.style.color = profit >= 0 ? "#00ff94" : "#ff2251";
+    document.getElementById("resAmt").textContent = (profit >= 0 ? "+" : "") + Math.floor(profit);
+    document.getElementById("resAmt").style.color = profit >= 0 ? "#00ff94" : "#ff2251";
     updateUI();
-}
+});
 
 function nextRound() {
     phase = "betting";
-    document.getElementById("btnWrap").style.display = "flex";
+    document.getElementById("gameControls").style.display = "block";
     document.getElementById("resultBox").style.display = "none";
-    document.getElementById("gaugeVal").textContent = "———";
-    document.getElementById("gFill").style.width = "0%";
     btn.textContent = "JOUER";
     btn.style.background = "radial-gradient(circle, #ff2251, #aa1535)";
-    if(bank <= 0) { alert("BANQUEROUTE !"); bank = 1000; updateUI(); }
+    btn.style.boxShadow = "0 6px 0 #660d20";
+    if(bank <= 0) { bank = 1000; updateUI(); }
 }
-
-function drawChart() {
-    history.push(gaugeVal);
-    if (history.length > 50) history.shift();
-    const path = document.getElementById("chartLine");
-    let d = history.map((v, i) => `${(i/50)*100},${30 - v*10}`).join(" L ");
-    path.setAttribute("d", "M " + d);
-}
-
-updateUI();
 </script>
 </body>
 </html>
