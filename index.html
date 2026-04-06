@@ -6,42 +6,6 @@
     <title>GREED</title>
     <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
     <style>
-        .chart-box{
-  background:rgba(0,0,0,0.4);
-  border:1px solid rgba(255,160,30,0.15);
-  border-radius:6px;
-  padding:8px 6px 6px;
-  position:relative;
-  overflow:hidden;
-}
-
-.chart-midline{
-  position:absolute;
-  top:50%;
-  left:6px;
-  right:6px;
-  height:1px;
-  background:rgba(255,255,255,0.06);
-  transform:translateY(-50%);
-}
-
-.chart-live{
-  position:absolute;
-  top:5px;
-  right:8px;
-  font-size:8px;
-  color:rgba(255,160,30,0.3);
-  letter-spacing:2px;
-}
-
-.phase-lbl{
-  position:absolute;
-  top:5px;
-  left:8px;
-  font-size:8px;
-  color:rgba(255,255,255,0.15);
-  letter-spacing:2px;
-}
         
         .gauge-box{
   display:flex;
@@ -213,53 +177,121 @@ let history = [];
 let rafId = null;
 let ownedItems = [];
 
-// Met à jour la jauge
-function updateGauge(val){
-    const fill = document.getElementById("gaugeFill");
-    const txt  = document.getElementById("gaugeValue");
+// 1. LA VRAIE LOGIQUE DE COURBE COMPLEXE
+function createOsc() {
+    const phases = [
+        { l: "calm", d: [800, 1400], dr: 0, n: 0.3 },
+        { l: "build", d: [600, 1000], dr: 0.5, n: 0.2 },
+        { l: "fake_pump", d: [400, 700], dr: 2.2, n: 0.15 },
+        { l: "trap_drop", d: [300, 600], dr: -3.2, n: 0.4 },
+        { l: "recovery", d: [500, 900], dr: 0.7, n: 0.3 }
+    ];
+    let pi = 0, pt = 0, pT = 1000, v = 0, vel = 0;
 
-    const clamped = Math.max(0, Math.min(100, val));
-    fill.style.width = clamped + "%";
-    txt.textContent = clamped;
+    return {
+        tick: function(dt, speedMult) {
+            pt += dt * speedMult;
+            if (pt >= pT) {
+                pi = (pi + 1) % phases.length;
+                pt = 0;
+                pT = phases[pi].d[0] + Math.random() * (phases[pi].d[1] - phases[pi].d[0]);
+            }
+            const p = phases[pi];
+            // Calcul physique de la courbe
+            vel = vel * 0.88 + (-v * 0.04) + (p.dr * 0.012 * speedMult) + ((Math.random() * 2 - 1) * p.n * 0.5 * speedMult);
+            v = Math.max(-1, Math.min(1, v + vel * (dt / 16)));
+            return { value: v, phaseName: p.l };
+        },
+        reset: function() { pi = 0; pt = 0; v = 0; vel = 0; }
+    };
 }
+
+const osc = createOsc();
+const line = document.getElementById("chartLine");
+
+// 2. DESSIN DE LA COURBE
+function drawChart() {
+    if (history.length < 2) return;
+    const W = 100; // Largeur relative SVG
+    const pts = history.map((v, i) => {
+        const x = (i / (history.length - 1)) * W;
+        const y = 20 - (v * 15); // Centrage vertical
+        return `${x},${y}`;
+    }).join(" L ");
+    line.setAttribute("d", "M " + pts);
     
-function showView(v) {
-    document.getElementById('view-game').style.display = (v === 'game') ? 'block' : 'none';
-    document.getElementById('view-shop').style.display = (v === 'shop') ? 'block' : 'none';
-    document.getElementById('view-apt').style.display = (v === 'apt') ? 'block' : 'none';
+    // Change la couleur selon profit/perte
+    line.setAttribute("stroke", gaugeVal >= 0 ? "#00ff94" : "#ff2251");
 }
 
-function buyItem(id, price) {
-    if (bank >= price) {
-        bank -= price;
-        ownedItems.push(id);
-        updateUI();
-        renderApartment();
-        alert("ACHETÉ !");
-    } else {
-        alert("SOLDE INSUFFISANT");
+// 3. ACTIONS DU BOUTON
+const btn = document.getElementById("holdBtn");
+
+btn.addEventListener("pointerdown", (e) => {
+    e.preventDefault();
+    if (phase !== "betting") return;
+    
+    phase = "holding";
+    osc.reset();
+    history = [];
+    btn.textContent = "ENCAISSER";
+    btn.style.background = "radial-gradient(circle, #00ff94, #008855)";
+    
+    let lastTime = performance.now();
+    
+    function loop(t) {
+        let dt = t - lastTime;
+        lastTime = t;
+
+        // On utilise la vitesse du slider pour influencer la nervosité
+        const speedMult = 0.5 + (speedPct / 50);
+        const result = osc.tick(dt, speedMult);
+        
+        gaugeVal = result.value;
+        history.push(gaugeVal);
+        if (history.length > 60) history.shift();
+
+        // Calcul du profit en temps réel
+        const riskAmount = bank * (speedPct / 100);
+        const currentProfit = gaugeVal * riskAmount;
+
+        // Mise à jour UI
+        drawChart();
+        const gFill = document.getElementById("gaugeFill");
+        const gTxt = document.getElementById("gaugeValue");
+        
+        gTxt.textContent = (currentProfit >= 0 ? "+" : "") + Math.floor(currentProfit);
+        gTxt.style.color = currentProfit >= 0 ? "#00ff94" : "#ff2251";
+        
+        const visualPct = 50 + (gaugeVal * 50);
+        gFill.style.width = Math.max(0, Math.min(100, visualPct)) + "%";
+        gFill.style.background = currentProfit >= 0 ? "#00ff94" : "#ff2251";
+
+        if (phase === "holding") rafId = requestAnimationFrame(loop);
     }
-}
+    rafId = requestAnimationFrame(loop);
+});
 
-function renderApartment() {
-    const layer = document.getElementById('apt-items-layer');
-    layer.innerHTML = "";
-    ownedItems.forEach(item => {
-        const img = document.createElement('img');
-        img.src = `images/item_${item}.png`;
-        img.style.position = "absolute";
-        img.style.width = "60px";
-        if(item === 'setup') { img.style.bottom = "20px"; img.style.left = "20px"; }
-        if(item === 'canape') { img.style.bottom = "10px"; img.style.right = "20px"; }
-        layer.appendChild(img);
-    });
-}
-
-document.getElementById("speedSlider").addEventListener("input", function() {
-    speedPct = this.value;
+btn.addEventListener("pointerup", () => {
+    if (phase !== "holding") return;
+    cancelAnimationFrame(rafId);
+    
+    const riskAmount = bank * (speedPct / 100);
+    const finalProfit = gaugeVal * riskAmount;
+    
+    bank += finalProfit;
+    if (bank < 0) bank = 0;
+    
+    phase = "result";
+    document.getElementById("gameControls").style.display = "none";
+    document.getElementById("resultBox").style.display = "block";
+    document.getElementById("resAmt").textContent = (finalProfit >= 0 ? "+" : "") + Math.floor(finalProfit);
+    document.getElementById("resAmt").style.color = finalProfit >= 0 ? "#00ff94" : "#ff2251";
+    
     updateUI();
 });
 
+// INITIALISATION ET NAV
 function updateUI() {
     document.getElementById("bankAmt").textContent = `$${Math.floor(bank).toLocaleString()}`;
     document.getElementById("speedVal").textContent = speedPct + "%";
@@ -268,51 +300,11 @@ function updateUI() {
     lbl.style.color = speedPct < 40 ? "#00ff94" : speedPct < 75 ? "#ff9f1e" : "#ff2251";
 }
 
-const btn = document.getElementById("holdBtn");
-btn.addEventListener("pointerdown", () => {
-    if (phase !== "betting") return;
-    phase = "holding";
-    history = [];
-    btn.textContent = "ENCAISSER";
-    btn.style.background = "radial-gradient(circle, #00ff94, #008855)";
-    btn.style.boxShadow = "0 6px 0 #004422";
-    
-    let startTime = Date.now();
-    function loop() {
-        let elapsed = (Date.now() - startTime) / 1000;
-        gaugeVal = Math.sin(elapsed * (speedPct/8)) * (speedPct/40) + (elapsed * 0.05);
-        
-        history.push(gaugeVal);
-        if(history.length > 50) history.shift();
-        document.getElementById("chartLine").setAttribute("d", "M " + history.map((v,i) => `${(i/50)*100},${20 - v*10}`).join(" L "));
-
-        const currentProfit = gaugeVal * (bank * (speedPct/100));
-        const gV = document.getElementById("gaugeVal");
-        gV.textContent = (currentProfit >= 0 ? "+" : "") + Math.floor(currentProfit);
-        gV.style.color = currentProfit >= 0 ? "#00ff94" : "#ff2251";
-        
-        document.getElementById("gFill").style.width = Math.min(100, Math.max(0, 50 + (gaugeVal * 25))) + "%";
-        document.getElementById("gFill").style.background = currentProfit >= 0 ? "#00ff94" : "#ff2251";
-        
-        rafId = requestAnimationFrame(loop);
-    }
-    loop();
-});
-
-btn.addEventListener("pointerup", () => {
-    if (phase !== "holding") return;
-    cancelAnimationFrame(rafId);
-    phase = "result";
-    const profit = gaugeVal * (bank * (speedPct/100));
-    bank += profit;
-    if(bank < 0) bank = 0;
-    
-    document.getElementById("gameControls").style.display = "none";
-    document.getElementById("resultBox").style.display = "block";
-    document.getElementById("resAmt").textContent = (profit >= 0 ? "+" : "") + Math.floor(profit);
-    document.getElementById("resAmt").style.color = profit >= 0 ? "#00ff94" : "#ff2251";
-    updateUI();
-});
+function showView(v) {
+    document.getElementById('view-game').style.display = (v === 'game') ? 'block' : 'none';
+    document.getElementById('view-shop').style.display = (v === 'shop') ? 'block' : 'none';
+    document.getElementById('view-apt').style.display = (v === 'apt') ? 'block' : 'none';
+}
 
 function nextRound() {
     phase = "betting";
@@ -320,9 +312,11 @@ function nextRound() {
     document.getElementById("resultBox").style.display = "none";
     btn.textContent = "JOUER";
     btn.style.background = "radial-gradient(circle, #ff2251, #aa1535)";
-    btn.style.boxShadow = "0 6px 0 #660d20";
-    if(bank <= 0) { bank = 1000; updateUI(); }
+    if (bank <= 0) { bank = 1000; alert("Banqueroute ! Le boss te prête 1000$."); }
+    updateUI();
 }
+
+updateUI();
 </script>
 </body>
 </html>
