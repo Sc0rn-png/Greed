@@ -3,368 +3,196 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-<title>GREED - Trading Arcade</title>
+<title>GREED - Arcade Edition</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
 <style>
-    /* RESET & BASE */
-    *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-    html,body{height:100%;background:#0d0a06;overflow-x:hidden;color:#fff;font-family:'DM Mono',monospace;user-select:none;}
+/* --- STYLES ORIGINAUX (CONSERVÉS) --- */
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;background:#0d0a06;overflow-x:hidden;}
+body{font-family:'DM Mono',monospace;user-select:none;-webkit-user-select:none;color:#fff;}
 
-    /* LAYOUT */
-    .page{width:100%;max-width:480px;margin:0 auto;padding:20px;display:flex;flex-direction:column;gap:15px;min-height:100vh;}
-    
-    /* UI ELEMENTS */
-    .topbar{display:flex;justify-content:space-between;align-items:center;padding-bottom:12px;border-bottom:1px solid rgba(255,160,30,0.2);}
-    .logo{font-size:11px;letter-spacing:6px;color:rgba(255,160,30,0.7);cursor:pointer;}
-    .nav-btn{background:rgba(255,160,30,0.1);border:1px solid rgba(255,160,30,0.3);color:#ff9f1e;font-size:9px;padding:6px 10px;border-radius:4px;cursor:pointer;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.15}}
+@keyframes btnPulse{0%,100%{box-shadow:0 8px 0 #2a0a00,0 0 30px rgba(255,80,0,0.35)}50%{box-shadow:0 8px 0 #2a0a00,0 0 55px rgba(255,80,0,0.65)}}
 
-    .bank-wrap{text-align:center;padding:10px 0;}
-    .bank-amount{font-size:48px;font-weight:300;text-shadow:0 0 20px rgba(255,160,30,0.2);}
+.page{width:100%;max-width:480px;margin:0 auto;padding:24px 20px;display:flex;flex-direction:column;gap:12px;position:relative;min-height:100vh;}
+.topbar{display:flex;justify-content:space-between;align-items:center;padding-bottom:12px;border-bottom:1px solid rgba(255,160,30,0.2);}
+.logo{font-size:11px;letter-spacing:8px;color:rgba(255,160,30,0.7);font-weight:500;}
 
-    /* CHAR & BOSS */
-    .char-row{display:flex;align-items:flex-end;gap:12px;min-height:80px;}
-    .char-emoji{font-size:50px;line-height:1;}
-    .boss-bubble{flex:1;background:linear-gradient(135deg,#1a1a2e,#16213e);border:1px solid rgba(255,180,0,0.25);border-radius:0 12px 12px 12px;padding:10px;font-size:11px;color:rgba(255,220,100,0.9);font-style:italic;}
+/* BANQUE */
+.bank-wrap{text-align:center;padding:4px 0;}
+.bank-amount{font-size:52px;font-weight:300;letter-spacing:-2px;line-height:1;text-shadow:0 0 30px rgba(255,160,30,0.2);}
 
-    /* CHART SYSTEM */
-    .chart-box {
-    background: rgba(0,0,0,0.4);
-    border: 1px solid rgba(255,160,30,0.15);
-    border-radius: 6px;
-    position: relative;
-    overflow: hidden;
-    padding: 10px 0;
-}
-.chart-midline {
-    position: absolute;
-    top: 50%; left: 0; right: 0;
-    height: 1px;
-    background: rgba(255,255,255,0.06);
-    z-index: 1;
-}
-/* Animation du label de phase (clignotement en cas de piège) */
-@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.2; } }
-.phase-lbl {
-    position: absolute;
-    top: 5px; left: 8px;
-    font-size: 8px;
-    letter-spacing: 2px;
-    z-index: 2;
-}
+/* CHARTE NÉON */
+.chart-box{background:rgba(0,0,0,0.4);border:1px solid rgba(255,160,30,0.15);border-radius:6px;padding:8px 0;position:relative;overflow:hidden;}
+.chart-midline{position:absolute;top:50%;left:0;right:0;height:1px;background:rgba(255,255,255,0.06);z-index:1;}
+.phase-lbl{position:absolute;top:5px;left:8px;font-size:8px;letter-spacing:2px;z-index:2;}
 
-    /* GAUGE */
-    .gauge-container{margin-top:10px;}
-    .gauge-header{display:flex;justify-content:space-between;font-size:8px;margin-bottom:5px;color:rgba(255,255,255,0.3);}
-    .gauge-val{font-size:22px;font-weight:500;text-align:right;}
-    .gauge-track{height:12px;background:rgba(0,0,0,0.5);border:1px solid rgba(255,160,30,0.15);border-radius:6px;position:relative;overflow:hidden;}
-    .gauge-fill{position:absolute;height:100%;width:0%;left:50%;transition:background 0.2s;}
+/* BOSS */
+.char-row{display:flex;align-items:flex-end;gap:12px;min-height:90px;}
+.char-emoji{font-size:64px;line-height:1;}
+.boss-bubble{flex:1;background:linear-gradient(135deg,#1a1a2e,#16213e);border:1px solid rgba(255,180,0,0.25);border-radius:0 12px 12px 12px;padding:10px 12px;font-size:11px;color:rgba(255,220,100,0.9);line-height:1.5;font-style:italic;}
 
-    /* CONTROLS */
-    .speed-box{background:rgba(255,255,255,0.03);padding:15px;border-radius:8px;margin-top:10px;}
-    input[type=range]{width:100%;height:5px;accent-color:#ff9f1e;margin-top:10px;}
-    
-    .btn-wrap{display:flex;justify-content:center;padding:20px 0;}
-    #holdBtn{width:120px;height:120px;border-radius:50%;border:none;background:radial-gradient(circle,#ff2251,#aa1535);color:#fff;font-weight:bold;cursor:pointer;box-shadow:0 8px 0 #660d20;transition:transform 0.05s;}
-    #holdBtn:active{transform:translateY(4px);box-shadow:0 4px 0 #660d20;}
+/* GAUGE */
+.gauge-val{font-size:24px;font-weight:500;transition:color 0.1s;}
+.gauge-track{position:relative;height:16px;background:rgba(0,0,0,0.5);border-radius:8px;overflow:hidden;border:1px solid rgba(255,160,30,0.15);}
+.gauge-fill{position:absolute;top:0;bottom:0;border-radius:8px;left:50%;width:0%;}
 
-    /* SUB-VIEWS */
-    .sub-view{display:none;animation:slideUp 0.3s ease;}
-    .shop-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-    .shop-item{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);padding:15px;text-align:center;border-radius:8px;}
-    .apt-room{width:100%;height:250px;background:#111;border:1px solid #ff9f1e;position:relative;border-radius:8px;overflow:hidden;}
-    .buy-btn{background:#ff9f1e;border:none;color:#000;font-weight:bold;padding:8px;width:100%;border-radius:4px;cursor:pointer;margin-top:10px;}
-    .back-btn{width:100%;margin-top:20px;background:#222;color:#ff9f1e;border:1px solid #ff9f1e;padding:12px;border-radius:6px;cursor:pointer;}
+/* BOUTON */
+.btn-wrap{display:flex;justify-content:center;padding:20px 0;}
+#holdBtn{width:130px;height:130px;border-radius:50%;border:none;cursor:pointer;outline:none;background:radial-gradient(circle at 35% 30%,#ff2251 0%,#aa1535 60%,#660d20 100%);box-shadow:0 8px 0 #4d0a18;color:#fff;font-weight:bold;animation:btnPulse 2s infinite;}
+#holdBtn:active{transform:translateY(4px);box-shadow:0 4px 0 #4d0a18;}
 
-    @keyframes slideUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+/* RÉSULTATS */
+#resultBox{display:none;animation:slideUp 0.3s ease;}
+.arcade-btn{width:100%;padding:16px 0;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:5px;background:rgba(255,160,30,0.1);border:2px solid #ff9f1e;color:#ff9f1e;border-radius:6px;cursor:pointer;margin-top:10px;}
 </style>
 </head>
 <body>
 
 <div class="page">
-    <div class="topbar">
-        <div class="logo" onclick="showView('game')">◈ GREED ◈</div>
-        <div style="display:flex;gap:8px;">
-            <button class="nav-btn" onclick="showView('apt')">🏠 LOGIS</button>
-            <button class="nav-btn" onclick="showView('shop')">🛒 SHOP</button>
-        </div>
-    </div>
-
+    <div class="topbar"><div class="logo">◈ GREED ◈</div><div id="roundInfo">ROUND 1</div></div>
+    
     <div class="bank-wrap">
         <div class="bank-amount" id="bankAmt">$1 000</div>
     </div>
 
-    <div id="view-game">
-        <div class="char-row">
-            <div class="char-emoji" id="charEmoji">😐</div>
-            <div class="boss-bubble" id="bossText">Prouve-moi que c'était pas un accident.</div>
-        </div>
-
-        <div class="chart-box">
-    <div class="chart-midline"></div>
-    <svg id="chartSvg" width="100%" viewBox="0 0 300 55" preserveAspectRatio="none" style="display:block;height:80px;">
-        <defs>
-            <linearGradient id="cg" x1="0" y1="0" x2="0" y2="1">
-                <stop id="cgT" offset="0%" stop-color="#00ff94" stop-opacity="0.4"/>
-                <stop id="cgB" offset="100%" stop-color="#00ff94" stop-opacity="0.02"/>
-            </linearGradient>
-        </defs>
-        <path id="chartArea" d="" fill="url(#cg)" />
-        <path id="chartLine" d="" fill="none" stroke-width="2.5" stroke-linejoin="round" />
-    </svg>
-    <div class="phase-lbl" id="phaseLbl"></div>
-    <div class="chart-live">LIVE</div>
-</div>
-
-        <div class="gauge-container">
-            <div class="gauge-header">
-                <span>GAIN / PERTE</span>
-                <span id="gaugeValue" class="gauge-val">$0</span>
-            </div>
-            <div class="gauge-track">
-                <div id="gaugeFill" class="gauge-fill"></div>
-            </div>
-        </div>
-
-        <div class="speed-box">
-            <div style="display:flex;justify-content:space-between;font-size:9px;">
-                <span id="speedLbl" style="color:#00ff94">SÉCURISÉ</span>
-                <span id="speedVal">30%</span>
-            </div>
-            <input type="range" id="speedSlider" min="10" max="100" step="5" value="30"/>
-        </div>
-
-        <div class="btn-wrap" id="gameControls">
-            <button id="holdBtn">JOUER</button>
-        </div>
-
-        <div id="resultBox" style="display:none;text-align:center;">
-            <div id="resAmt" style="font-size:32px;margin:20px 0;">+0</div>
-            <button class="back-btn" onclick="nextRound()" style="background:#ff9f1e;color:#000;border:none;">ROUND SUIVANT</button>
+    <div class="char-row">
+        <div class="char-emoji" id="charEmoji">😐</div>
+        <div class="boss-bubble">
+            <span id="bossText">Prouve-moi que c'était pas un accident.</span>
         </div>
     </div>
 
-    <div id="view-shop" class="sub-view">
-        <div class="shop-grid">
-            <div class="shop-item">
-                <div style="font-size:30px">🖥️</div>
-                <span style="font-size:10px">PC GAMER</span>
-                <button class="buy-btn" onclick="buyItem('setup', 2500)">$2.5K</button>
-            </div>
-            <div class="shop-item">
-                <div style="font-size:30px">🛋️</div>
-                <span style="font-size:10px">CANAPÉ CUIR</span>
-                <button class="buy-btn" onclick="buyItem('canape', 5000)">$5K</button>
-            </div>
-        </div>
-        <button class="back-btn" onclick="showView('game')">↩ RETOUR AU BUREAU</button>
+    <div class="chart-box">
+        <div class="chart-midline"></div>
+        <svg id="chartSvg" width="100%" viewBox="0 0 300 55" preserveAspectRatio="none" style="display:block;height:80px;">
+            <defs>
+                <linearGradient id="cg" x1="0" y1="0" x2="0" y2="1">
+                    <stop id="cgT" offset="0%" stop-color="#00ff94" stop-opacity="0.4"/>
+                    <stop id="cgB" offset="100%" stop-color="#00ff94" stop-opacity="0.02"/>
+                </linearGradient>
+            </defs>
+            <path id="chartArea" d="" fill="url(#cg)" />
+            <path id="chartLine" d="" fill="none" stroke-width="2.5" stroke-linejoin="round" />
+        </svg>
+        <div class="phase-lbl" id="phaseLbl">CALME</div>
     </div>
 
-    <div id="view-apt" class="sub-view">
-        <div class="apt-room" id="aptRoom">
-            <div id="apt-items-layer"></div>
+    <div class="gauge-box">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-size:8px;color:rgba(255,255,255,0.2);">GAIN / PERTE</span>
+            <span class="gauge-val" id="gaugeVal">$0</span>
         </div>
-        <button class="back-btn" onclick="showView('game')">↩ RETOUR AU BUREAU</button>
+        <div class="gauge-track">
+            <div class="gauge-fill" id="gFill"></div>
+        </div>
+    </div>
+
+    <div style="background:rgba(0,0,0,0.3);padding:15px;border-radius:6px;">
+        <input type="range" id="speedSlider" min="10" max="100" step="5" value="30" style="width:100%;accent-color:#ff9f1e;"/>
+    </div>
+
+    <div class="btn-wrap" id="btnWrap">
+        <button id="holdBtn">JOUER</button>
+    </div>
+
+    <div id="resultBox">
+        <button class="arcade-btn" onclick="nextRound()">▶ ROUND SUIVANT</button>
     </div>
 </div>
 
 <script>
-let bank = 1000;
-let speedPct = 30;
-let gaugeVal = 0;
-let gPhase = "calm"; // Ajouté pour la charte
-let phase = "betting";
-let history = [];
-let lastT = null;    // Ajouté pour le calcul du temps
-let rafId = null;
-const osc = createOsc(); // Ta fonction createOsc() doit être définie
-    
-// 1. LOGIQUE DE L'OSCILLATEUR (LA COURBE)
-function createOsc() {
-    const phases = [
-        { l: "CALME", d: [800, 1400], dr: 0, n: 0.3 },
-        { l: "MONTÉE", d: [600, 1000], dr: 0.5, n: 0.2 },
-        { l: "PIÈGE", d: [400, 700], dr: 2.2, n: 0.15 },
-        { l: "CHUTE", d: [300, 600], dr: -3.2, n: 0.4 }
-    ];
-    let pi = 0, pt = 0, pT = 1000, v = 0, vel = 0;
+// --- LOGIQUE CORE (RÉTABLIE) ---
+let bank=1000, speedPct=30, gaugeVal=0, phase="betting", round=1, history=[], lastT=null, rafId=null;
 
-    return {
-        tick: function(dt, speedMult) {
-            pt += dt * speedMult;
-            if (pt >= pT) {
-                pi = (pi + 1) % phases.length;
-                pt = 0;
-                pT = phases[pi].d[0] + Math.random() * (phases[pi].d[1] - phases[pi].d[0]);
-            }
-            const p = phases[pi];
-            vel = vel * 0.88 + (-v * 0.04) + (p.dr * 0.012 * speedMult) + ((Math.random()*2-1)*p.n*0.5*speedMult);
-            v = Math.max(-1, Math.min(1, v + vel * (dt / 16)));
-            return { value: v, name: p.l };
+const BOSS_WIN=["Bien joué… pour une fois.","Bravo ! Tu vois quand tu veux.","Pas mal du tout."];
+const BOSS_LOSE=["Aie... C'est de l'expérience, disons.","J'aurais pas fait ça.","C'était quoi le plan ?"];
+
+function createOsc(){
+    const C=[{l:"CALME",d:[800,1400],dr:0,n:0.3},{l:"HAUSSE",d:[600,1000],dr:0.5,n:0.2},{l:"PIÈGE",d:[400,700],dr:2.2,n:0.15},{l:"CHUTE",d:[300,600],dr:-3.2,n:0.4}];
+    let pi=0,pt=0,pT=1000,v=0,vel=0;
+    return{
+        tick(dt,sm){
+            pt+=dt*sm; if(pt>=pT){pi=(pi+1)%C.length;pt=0;pT=C[pi].d[0]+Math.random()*500;}
+            const p=C[pi];
+            vel=vel*0.88+(-v*0.04)+(p.dr*0.012*sm)+((Math.random()*2-1)*p.n*0.5*sm);
+            v=Math.max(-1,Math.min(1,v+vel*(dt/16))); return{value:v,phase:p.l};
         },
-        reset: function() { pi = 0; pt = 0; v = 0; vel = 0; }
+        reset(){pi=0;pt=0;v=0;vel=0;}
     };
 }
+const osc=createOsc();
 
-const osc = createOsc();
-
-// 2. GESTION DES VUES
-function showView(v) {
-    document.querySelectorAll('.sub-view, #view-game').forEach(el => el.style.display = 'none');
-    document.getElementById('view-' + v).style.display = 'block';
+function updateUI(){
+    document.getElementById("bankAmt").textContent=`$${Math.floor(bank).toLocaleString()}`;
+    document.getElementById("roundInfo").textContent=`ROUND ${round}`;
 }
 
-// 3. LOGIQUE BOUTIQUE
-function buyItem(id, price) {
-    if (bank >= price) {
-        bank -= price;
-        ownedItems.push(id);
-        updateUI();
-        renderApartment();
-        alert("ACHETÉ !");
-    } else {
-        alert("SOLDE INSUFFISANT");
-    }
-}
+const btn=document.getElementById("holdBtn");
 
-function renderApartment() {
-    const layer = document.getElementById('apt-items-layer');
-    layer.innerHTML = "";
-    ownedItems.forEach(item => {
-        const div = document.createElement('div');
-        div.style.position = "absolute";
-        div.style.fontSize = "40px";
-        if(item === 'setup') { div.innerHTML = "🖥️"; div.style.bottom = "20px"; div.style.left = "20px"; }
-        if(item === 'canape') { div.innerHTML = "🛋️"; div.style.bottom = "10px"; div.style.right = "20px"; }
-        layer.appendChild(div);
-    });
-}
+btn.addEventListener("pointerdown",(e)=>{
+    if(phase!=="betting") return;
+    phase="holding";
+    osc.reset(); history=[]; lastT=performance.now();
+    btn.style.background="radial-gradient(circle,#00ff94,#006635)";
+    btn.style.boxShadow="0 8px 0 #004d28";
+    document.getElementById("charEmoji").textContent="😰";
 
-// 4. GAMEPLAY
-const btn = document.getElementById("holdBtn");
-
-btn.addEventListener("pointerdown", (e) => {
-    if (phase !== "betting") return;
-    phase = "holding";
-    osc.reset();
-    history = [];
-    btn.textContent = "ENCAISSER";
-    btn.style.background = "radial-gradient(circle, #00ff94, #008855)";
-    document.getElementById("charEmoji").textContent = "😰";
-    
-    let lastTime = performance.now();
-    function loop(t) {
-        const { value, phase } = osc.tick(dt, sm());
-    
-    history.push(value);
-    if(history.length > 80) history.shift();
-        let dt = t - lastTime;
-        lastTime = t;
-        const speedMult = 0.5 + (speedPct / 50);
-        const res = osc.tick(dt, speedMult);
+    function loop(t){
+        let dt=t-lastT; lastT=t;
+        const res=osc.tick(dt, 0.3+(speedPct-10)/90*2.7);
+        gaugeVal=res.value;
+        history.push(gaugeVal); if(history.length>80) history.shift();
         
-        gaugeVal = res.value;
-        history.push(gaugeVal);
-        if (history.length > 60) history.shift();
+        // Dessin charte
+        const color=gaugeVal>0.5?"#00ff94":gaugeVal>0?"#aaff44":gaugeVal>-0.35?"#ffee00":"#ff2251";
+        const pts=history.map((v,i)=>`${(i/(history.length-1))*300},${27-v*24}`).join(" L ");
+        document.getElementById("chartLine").setAttribute("d","M "+pts);
+        document.getElementById("chartLine").setAttribute("stroke",color);
+        document.getElementById("chartArea").setAttribute("d","M "+pts+" L 300,27 L 0,27 Z");
+        document.getElementById("cgT").setAttribute("stop-color",color);
+        document.getElementById("phaseLbl").textContent=res.phase;
+        document.getElementById("phaseLbl").style.color=color;
 
-        // Update UI
-        document.getElementById("phaseLbl").textContent = res.name;
-        document.getElementById("chartLine").setAttribute("d", "M " + history.map((v,i) => `${(i/(history.length-1))*100},${20 - v*15}`).join(" L "));
-        
-        const profit = gaugeVal * (bank * (speedPct / 100));
-        const gV = document.getElementById("gaugeValue");
-        gV.textContent = (profit >= 0 ? "+$" : "-$") + Math.abs(Math.floor(profit));
-        gV.style.color = profit >= 0 ? "#00ff94" : "#ff2251";
+        // Gauge
+        const profit=Math.floor(gaugeVal*(bank*(speedPct/100)));
+        const gv=document.getElementById("gaugeVal");
+        gv.textContent=(profit>=0?"+$":"-$")+Math.abs(profit);
+        gv.style.color=color;
+        const gf=document.getElementById("gFill");
+        gf.style.width=Math.abs(gaugeVal*50)+"%";
+        gf.style.left=gaugeVal>=0?"50%":(50-Math.abs(gaugeVal*50))+"%";
+        gf.style.background=color;
 
-        const fill = document.getElementById("gaugeFill");
-        fill.style.width = Math.abs(gaugeVal * 50) + "%";
-        fill.style.left = gaugeVal >= 0 ? "50%" : (50 - Math.abs(gaugeVal * 50)) + "%";
-        fill.style.background = profit >= 0 ? "#00ff94" : "#ff2251";
-
-        if (phase === "holding") rafId = requestAnimationFrame(loop);
+        if(phase==="holding") rafId=requestAnimationFrame(loop);
     }
-    rafId = requestAnimationFrame(loop);
+    rafId=requestAnimationFrame(loop);
 });
 
-btn.addEventListener("pointerdown", (e) => {
-    e.preventDefault();
-    if (phase !== "betting") return;
-
-    // Initialisation
-    phase = "holding";
-    osc.reset();
-    history = [];
-    lastT = performance.now(); 
-    
-    // UI du bouton
-    btn.textContent = "ENCAISSER";
-    btn.style.background = "radial-gradient(circle, #00ff94, #008855)";
-
-    // LA FONCTION LOOP
-    function loop(t) {
-        if (!lastT) lastT = t;
-        const dt = t - lastT;
-        lastT = t;
-
-        // 1. On fait avancer l'oscillateur
-        const sm = 0.3 + (speedPct - 10) / 90 * 2.7; // Calcul du multiplicateur de vitesse
-        const res = osc.tick(dt, sm);
-        
-        gaugeVal = res.value;
-        gPhase = res.phase;
-
-        // 2. On met à jour l'historique (max 80 points pour la fluidité)
-        history.push(gaugeVal);
-        if (history.length > 80) history.shift();
-
-        // 3. ON APPELLE LA BELLE CHARTE (La fonction que je t'ai donnée avant)
-        updateChartDrawing(gaugeVal, gPhase);
-
-        // 4. Mise à jour des textes de gains (Gauge)
-        const riskAmount = bank * (speedPct / 100) * 0.8;
-        const currentProfit = gaugeVal * riskAmount;
-        const gv = document.getElementById("gaugeVal");
-        gv.textContent = (currentProfit >= 0 ? "+$" : "-$") + Math.abs(Math.floor(currentProfit));
-        gv.style.color = gaugeVal >= 0 ? "#00ff94" : "#ff2251";
-
-        // 5. On continue la boucle
-        if (phase === "holding") {
-            rafId = requestAnimationFrame(loop);
-        }
-    }
-
-    // On lance la boucle
-    rafId = requestAnimationFrame(loop);
-});
-
-function nextRound() {
-    phase = "betting";
-    document.getElementById("gameControls").style.display = "flex";
-    document.getElementById("resultBox").style.display = "none";
-    btn.textContent = "JOUER";
-    btn.style.background = "radial-gradient(circle, #ff2251, #aa1535)";
-    document.getElementById("charEmoji").textContent = "😐";
-    if (bank <= 10) bank = 1000;
-    updateUI();
-}
-
-function updateUI() {
-    document.getElementById("bankAmt").textContent = `$${Math.floor(bank).toLocaleString()}`;
-    document.getElementById("speedVal").textContent = speedPct + "%";
-    const lbl = document.getElementById("speedLbl");
-    lbl.textContent = speedPct < 40 ? "SÉCURISÉ" : speedPct < 75 ? "RISQUÉ" : "YOLO 🔥";
-    lbl.style.color = speedPct < 40 ? "#00ff94" : speedPct < 75 ? "#ff9f1e" : "#ff2251";
-}
-
-document.getElementById("speedSlider").addEventListener("input", function() {
-    speedPct = this.value;
+btn.addEventListener("pointerup",()=>{
+    if(phase!=="holding") return;
+    phase="result";
+    cancelAnimationFrame(rafId);
+    const profit=Math.floor(gaugeVal*(bank*(speedPct/100)));
+    bank+=profit;
+    document.getElementById("btnWrap").style.display="none";
+    document.getElementById("resultBox").style.display="block";
+    document.getElementById("bossText").textContent=profit>=0?BOSS_WIN[Math.floor(Math.random()*3)]:BOSS_LOSE[Math.floor(Math.random()*3)];
+    document.getElementById("charEmoji").textContent=profit>=0?"🤑":"😭";
     updateUI();
 });
 
-updateChartDrawing(value, phase);
-    
-    rafId = requestAnimationFrame(loop);
+function nextRound(){
+    phase="betting"; round++;
+    document.getElementById("btnWrap").style.display="flex";
+    document.getElementById("resultBox").style.display="none";
+    btn.style.background="radial-gradient(circle at 35% 30%,#ff2251 0%,#aa1535 60%,#660d20 100%)";
+    btn.style.boxShadow="0 8px 0 #4d0a18";
+    document.getElementById("charEmoji").textContent="😐";
+    updateUI();
 }
 
+document.getElementById("speedSlider").addEventListener("input",function(){speedPct=this.value;});
 updateUI();
 </script>
 </body>
