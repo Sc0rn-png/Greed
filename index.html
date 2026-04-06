@@ -1,105 +1,70 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-    <title>GREED</title>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
-    <style>
-        
-        .gauge-box{
-  display:flex;
-  flex-direction:column;
-  gap:6px;
-}
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<title>GREED - Trading Arcade</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+    /* RESET & BASE */
+    *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+    html,body{height:100%;background:#0d0a06;overflow-x:hidden;color:#fff;font-family:'DM Mono',monospace;user-select:none;}
 
-.gauge-header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
+    /* LAYOUT */
+    .page{width:100%;max-width:480px;margin:0 auto;padding:20px;display:flex;flex-direction:column;gap:15px;min-height:100vh;}
+    
+    /* UI ELEMENTS */
+    .topbar{display:flex;justify-content:space-between;align-items:center;padding-bottom:12px;border-bottom:1px solid rgba(255,160,30,0.2);}
+    .logo{font-size:11px;letter-spacing:6px;color:rgba(255,160,30,0.7);cursor:pointer;}
+    .nav-btn{background:rgba(255,160,30,0.1);border:1px solid rgba(255,160,30,0.3);color:#ff9f1e;font-size:9px;padding:6px 10px;border-radius:4px;cursor:pointer;}
 
-.gauge-title{
-  font-size:8px;
-  color:rgba(255,255,255,0.2);
-  letter-spacing:3px;
-}
+    .bank-wrap{text-align:center;padding:10px 0;}
+    .bank-amount{font-size:48px;font-weight:300;text-shadow:0 0 20px rgba(255,160,30,0.2);}
 
-.gauge-val{
-  font-size:22px;
-  font-weight:500;
-  color:#fff;
-  font-variant-numeric:tabular-nums;
-}
+    /* CHAR & BOSS */
+    .char-row{display:flex;align-items:flex-end;gap:12px;min-height:80px;}
+    .char-emoji{font-size:50px;line-height:1;}
+    .boss-bubble{flex:1;background:linear-gradient(135deg,#1a1a2e,#16213e);border:1px solid rgba(255,180,0,0.25);border-radius:0 12px 12px 12px;padding:10px;font-size:11px;color:rgba(255,220,100,0.9);font-style:italic;}
 
-.gauge-bar{
-  width:100%;
-  height:10px;
-  background:rgba(255,255,255,0.05);
-  border:1px solid rgba(255,160,30,0.2);
-  border-radius:4px;
-  overflow:hidden;
-}
+    /* CHART SYSTEM */
+    .chart-box{background:rgba(0,0,0,0.4);border:1px solid rgba(255,160,30,0.15);border-radius:6px;height:100px;position:relative;overflow:hidden;}
+    .chart-live{position:absolute;top:5px;right:8px;font-size:8px;color:rgba(255,160,30,0.4);letter-spacing:2px;}
+    .phase-lbl{position:absolute;top:5px;left:8px;font-size:8px;letter-spacing:2px;color:#ff9f1e;}
 
-.gauge-fill{
-  height:100%;
-  width:0%;
-  background:linear-gradient(90deg,#ff8a00,#ff3b00);
-  transition:width 0.25s, background 0.25s;
-}
+    /* GAUGE */
+    .gauge-container{margin-top:10px;}
+    .gauge-header{display:flex;justify-content:space-between;font-size:8px;margin-bottom:5px;color:rgba(255,255,255,0.3);}
+    .gauge-val{font-size:22px;font-weight:500;text-align:right;}
+    .gauge-track{height:12px;background:rgba(0,0,0,0.5);border:1px solid rgba(255,160,30,0.15);border-radius:6px;position:relative;overflow:hidden;}
+    .gauge-fill{position:absolute;height:100%;width:0%;left:50%;transition:background 0.2s;}
 
-        *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-        html,body{height:100%;background:#0d0a06;overflow-x:hidden;color: #fff;font-family:'DM Mono',monospace;}
-        .page{width:100%; max-width:480px; margin:0 auto; padding:20px; display:flex; flex-direction:column; gap:15px;}
-        
-        /* Header & Nav */
-        .topbar{display:flex; justify-content:space-between; align-items:center; padding-bottom:12px; border-bottom:1px solid rgba(255,160,30,0.2);}
-        .logo{font-size:11px; letter-spacing:6px; color:rgba(255,160,30,0.7); font-weight:500;}
-        .nav-btn {background:rgba(255,160,30,0.1); border:1px solid rgba(255,160,30,0.3); color:#ff9f1e; font-size:9px; padding:6px 10px; border-radius:4px; cursor:pointer;}
+    /* CONTROLS */
+    .speed-box{background:rgba(255,255,255,0.03);padding:15px;border-radius:8px;margin-top:10px;}
+    input[type=range]{width:100%;height:5px;accent-color:#ff9f1e;margin-top:10px;}
+    
+    .btn-wrap{display:flex;justify-content:center;padding:20px 0;}
+    #holdBtn{width:120px;height:120px;border-radius:50%;border:none;background:radial-gradient(circle,#ff2251,#aa1535);color:#fff;font-weight:bold;cursor:pointer;box-shadow:0 8px 0 #660d20;transition:transform 0.05s;}
+    #holdBtn:active{transform:translateY(4px);box-shadow:0 4px 0 #660d20;}
 
-        /* Banque */
-        .bank-wrap{text-align:center; padding:15px 0;}
-        .bank-amount{font-size:45px; font-weight:300; letter-spacing:-1px;}
+    /* SUB-VIEWS */
+    .sub-view{display:none;animation:slideUp 0.3s ease;}
+    .shop-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+    .shop-item{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);padding:15px;text-align:center;border-radius:8px;}
+    .apt-room{width:100%;height:250px;background:#111;border:1px solid #ff9f1e;position:relative;border-radius:8px;overflow:hidden;}
+    .buy-btn{background:#ff9f1e;border:none;color:#000;font-weight:bold;padding:8px;width:100%;border-radius:4px;cursor:pointer;margin-top:10px;}
+    .back-btn{width:100%;margin-top:20px;background:#222;color:#ff9f1e;border:1px solid #ff9f1e;padding:12px;border-radius:6px;cursor:pointer;}
 
-        /* Vues */
-        .sub-view { display:none; animation: slideUp 0.3s ease; }
-        .back-btn { width: 100%; margin-top: 20px; background: #222; color: #ff9f1e; border: 1px solid #ff9f1e; padding: 12px; border-radius: 6px; cursor:pointer; font-family: inherit;}
-
-        /* Shop & Apt */
-        .shop-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .shop-item { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 15px; text-align: center; border-radius: 8px; }
-        .shop-item img { width: 100%; max-width: 60px; height: 60px; object-fit: contain; margin-bottom: 10px; }
-        .buy-btn { background: #ff9f1e; border: none; color: #000; font-weight: bold; padding: 8px; border-radius: 4px; width: 100%; cursor:pointer;}
-        .apt-room { width: 100%; height: 200px; background: #000; border: 1px solid #ff9f1e; position: relative; border-radius: 8px; overflow: hidden; }
-        .apt-bg { width: 100%; height: 100%; object-fit: cover; opacity: 0.4; }
-
-        /* Game Elements */
-        .chart-box{background:rgba(0,0,0,0.4); border:1px solid rgba(255,160,30,0.15); border-radius:6px; height:80px; position:relative; overflow:hidden;}
-        .gauge-track{height:12px; background:rgba(0,0,0,0.5); border-radius:6px; position:relative; overflow:hidden; border:1px solid rgba(255,160,30,0.15); margin: 10px 0;}
-        .gauge-fill{position:absolute; height:100%; width: 0%; transition: width 0.1s;}
-        .gauge-val{font-size:22px; font-weight:500; text-align: right; height: 30px;}
-        input[type=range]{width:100%; height:6px; -webkit-appearance:none; background:#333; border-radius:3px; margin: 15px 0;}
-        input[type=range]::-webkit-slider-thumb{-webkit-appearance:none; width:18px; height:18px; border-radius:50%; background:#ff9f1e; box-shadow: 0 0 10px #ff9f1e;}
-
-        @keyframes slideUp{from{opacity:0; transform:translateY(10px)}to{opacity:1; transform:translateY(0)}}
-    </style>
+    @keyframes slideUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+</style>
 </head>
 <body>
 
-    <div class="chart-box">
-  <div class="chart-midline"></div>
-  <div class="phase-lbl" id="chartPhase">PHASE 1</div>
-  <div class="chart-live">LIVE</div>
-
-  <canvas id="chartCanvas" width="400" height="140"></canvas>
-</div>
-
 <div class="page">
     <div class="topbar">
-        <div class="logo">◈ GREED ◈</div>
-        <div style="display:flex; gap:8px;">
-            <button class="nav-btn" onclick="showView('apt')">🏠 APPART</button>
-            <button class="nav-btn" onclick="showView('shop')">🛒 BOUTIQUE</button>
+        <div class="logo" onclick="showView('game')">◈ GREED ◈</div>
+        <div style="display:flex;gap:8px;">
+            <button class="nav-btn" onclick="showView('apt')">🏠 LOGIS</button>
+            <button class="nav-btn" onclick="showView('shop')">🛒 SHOP</button>
         </div>
     </div>
 
@@ -108,51 +73,57 @@
     </div>
 
     <div id="view-game">
+        <div class="char-row">
+            <div class="char-emoji" id="charEmoji">😐</div>
+            <div class="boss-bubble" id="bossText">Prouve-moi que c'était pas un accident.</div>
+        </div>
+
         <div class="chart-box">
+            <div class="phase-lbl" id="phaseLbl">CALME</div>
+            <div class="chart-live">LIVE</div>
             <svg width="100%" height="100%" viewBox="0 0 100 40" preserveAspectRatio="none">
-                <path id="chartLine" d="" fill="none" stroke="#ff9f1e" stroke-width="1"/>
+                <path id="chartLine" d="" fill="none" stroke="#ff9f1e" stroke-width="1.5" />
             </svg>
         </div>
 
-      <!-- Gauge -->
-<div class="gauge-box">
-  <div class="gauge-header">
-    <div class="gauge-title">RISQUE MANAGEMENT</div>
-    <div id="gaugeValue" class="gauge-val">0</div>
-  </div>
-  <div class="gauge-bar">
-    <div id="gaugeFill" class="gauge-fill"></div>
-  </div>
-</div>
+        <div class="gauge-container">
+            <div class="gauge-header">
+                <span>GAIN / PERTE</span>
+                <span id="gaugeValue" class="gauge-val">$0</span>
+            </div>
+            <div class="gauge-track">
+                <div id="gaugeFill" class="gauge-fill"></div>
+            </div>
+        </div>
 
-        <div style="background:rgba(255,255,255,0.03); padding:15px; border-radius:8px;">
-            <div style="display:flex; justify-content:space-between; font-size:9px; letter-spacing:1px;">
+        <div class="speed-box">
+            <div style="display:flex;justify-content:space-between;font-size:9px;">
                 <span id="speedLbl" style="color:#00ff94">SÉCURISÉ</span>
                 <span id="speedVal">30%</span>
             </div>
             <input type="range" id="speedSlider" min="10" max="100" step="5" value="30"/>
         </div>
 
-        <div style="text-align:center; padding:20px 0;" id="gameControls">
-            <button id="holdBtn" style="width:110px; height:110px; border-radius:50%; border:none; background: radial-gradient(circle, #ff2251, #aa1535); color:#fff; font-weight:bold; font-family:inherit; cursor:pointer; box-shadow: 0 6px 0 #660d20;">JOUER</button>
+        <div class="btn-wrap" id="gameControls">
+            <button id="holdBtn">JOUER</button>
         </div>
 
-        <div id="resultBox" style="display:none; text-align:center;">
-            <div id="resAmt" style="font-size:28px; margin-bottom:10px;">+0</div>
-            <button class="back-btn" onclick="nextRound()" style="background:#ff9f1e; color:#000; border:none;">CONTINUER</button>
+        <div id="resultBox" style="display:none;text-align:center;">
+            <div id="resAmt" style="font-size:32px;margin:20px 0;">+0</div>
+            <button class="back-btn" onclick="nextRound()" style="background:#ff9f1e;color:#000;border:none;">ROUND SUIVANT</button>
         </div>
     </div>
 
     <div id="view-shop" class="sub-view">
         <div class="shop-grid">
             <div class="shop-item">
-                <img src="images/item_setup.png" onerror="this.src='https://via.placeholder.com/60/222/ff9f1e?text=PC'">
-                <span style="display:block; font-size:10px; margin-bottom:5px;">PC GAMER</span>
+                <div style="font-size:30px">🖥️</div>
+                <span style="font-size:10px">PC GAMER</span>
                 <button class="buy-btn" onclick="buyItem('setup', 2500)">$2.5K</button>
             </div>
             <div class="shop-item">
-                <img src="images/item_canape.png" onerror="this.src='https://via.placeholder.com/60/222/ff9f1e?text=SOFA'">
-                <span style="display:block; font-size:10px; margin-bottom:5px;">CANAPÉ</span>
+                <div style="font-size:30px">🛋️</div>
+                <span style="font-size:10px">CANAPÉ CUIR</span>
                 <button class="buy-btn" onclick="buyItem('canape', 5000)">$5K</button>
             </div>
         </div>
@@ -160,15 +131,14 @@
     </div>
 
     <div id="view-apt" class="sub-view">
-        <div class="apt-room">
-            <img src="images/appart_vide.png" class="apt-bg" onerror="this.style.background='#111'">
+        <div class="apt-room" id="aptRoom">
             <div id="apt-items-layer"></div>
         </div>
         <button class="back-btn" onclick="showView('game')">↩ RETOUR AU BUREAU</button>
     </div>
 </div>
 
-<script>    
+<script>
 let bank = 1000;
 let speedPct = 30;
 let gaugeVal = 0;
@@ -177,14 +147,13 @@ let history = [];
 let rafId = null;
 let ownedItems = [];
 
-// 1. LA VRAIE LOGIQUE DE COURBE COMPLEXE
+// 1. LOGIQUE DE L'OSCILLATEUR (LA COURBE)
 function createOsc() {
     const phases = [
-        { l: "calm", d: [800, 1400], dr: 0, n: 0.3 },
-        { l: "build", d: [600, 1000], dr: 0.5, n: 0.2 },
-        { l: "fake_pump", d: [400, 700], dr: 2.2, n: 0.15 },
-        { l: "trap_drop", d: [300, 600], dr: -3.2, n: 0.4 },
-        { l: "recovery", d: [500, 900], dr: 0.7, n: 0.3 }
+        { l: "CALME", d: [800, 1400], dr: 0, n: 0.3 },
+        { l: "MONTÉE", d: [600, 1000], dr: 0.5, n: 0.2 },
+        { l: "PIÈGE", d: [400, 700], dr: 2.2, n: 0.15 },
+        { l: "CHUTE", d: [300, 600], dr: -3.2, n: 0.4 }
     ];
     let pi = 0, pt = 0, pT = 1000, v = 0, vel = 0;
 
@@ -197,75 +166,84 @@ function createOsc() {
                 pT = phases[pi].d[0] + Math.random() * (phases[pi].d[1] - phases[pi].d[0]);
             }
             const p = phases[pi];
-            // Calcul physique de la courbe
-            vel = vel * 0.88 + (-v * 0.04) + (p.dr * 0.012 * speedMult) + ((Math.random() * 2 - 1) * p.n * 0.5 * speedMult);
+            vel = vel * 0.88 + (-v * 0.04) + (p.dr * 0.012 * speedMult) + ((Math.random()*2-1)*p.n*0.5*speedMult);
             v = Math.max(-1, Math.min(1, v + vel * (dt / 16)));
-            return { value: v, phaseName: p.l };
+            return { value: v, name: p.l };
         },
         reset: function() { pi = 0; pt = 0; v = 0; vel = 0; }
     };
 }
 
 const osc = createOsc();
-const line = document.getElementById("chartLine");
 
-// 2. DESSIN DE LA COURBE
-function drawChart() {
-    if (history.length < 2) return;
-    const W = 100; // Largeur relative SVG
-    const pts = history.map((v, i) => {
-        const x = (i / (history.length - 1)) * W;
-        const y = 20 - (v * 15); // Centrage vertical
-        return `${x},${y}`;
-    }).join(" L ");
-    line.setAttribute("d", "M " + pts);
-    
-    // Change la couleur selon profit/perte
-    line.setAttribute("stroke", gaugeVal >= 0 ? "#00ff94" : "#ff2251");
+// 2. GESTION DES VUES
+function showView(v) {
+    document.querySelectorAll('.sub-view, #view-game').forEach(el => el.style.display = 'none');
+    document.getElementById('view-' + v).style.display = 'block';
 }
 
-// 3. ACTIONS DU BOUTON
+// 3. LOGIQUE BOUTIQUE
+function buyItem(id, price) {
+    if (bank >= price) {
+        bank -= price;
+        ownedItems.push(id);
+        updateUI();
+        renderApartment();
+        alert("ACHETÉ !");
+    } else {
+        alert("SOLDE INSUFFISANT");
+    }
+}
+
+function renderApartment() {
+    const layer = document.getElementById('apt-items-layer');
+    layer.innerHTML = "";
+    ownedItems.forEach(item => {
+        const div = document.createElement('div');
+        div.style.position = "absolute";
+        div.style.fontSize = "40px";
+        if(item === 'setup') { div.innerHTML = "🖥️"; div.style.bottom = "20px"; div.style.left = "20px"; }
+        if(item === 'canape') { div.innerHTML = "🛋️"; div.style.bottom = "10px"; div.style.right = "20px"; }
+        layer.appendChild(div);
+    });
+}
+
+// 4. GAMEPLAY
 const btn = document.getElementById("holdBtn");
 
 btn.addEventListener("pointerdown", (e) => {
-    e.preventDefault();
     if (phase !== "betting") return;
-    
     phase = "holding";
     osc.reset();
     history = [];
     btn.textContent = "ENCAISSER";
     btn.style.background = "radial-gradient(circle, #00ff94, #008855)";
+    document.getElementById("charEmoji").textContent = "😰";
     
     let lastTime = performance.now();
-    
     function loop(t) {
         let dt = t - lastTime;
         lastTime = t;
-
-        // On utilise la vitesse du slider pour influencer la nervosité
         const speedMult = 0.5 + (speedPct / 50);
-        const result = osc.tick(dt, speedMult);
+        const res = osc.tick(dt, speedMult);
         
-        gaugeVal = result.value;
+        gaugeVal = res.value;
         history.push(gaugeVal);
         if (history.length > 60) history.shift();
 
-        // Calcul du profit en temps réel
-        const riskAmount = bank * (speedPct / 100);
-        const currentProfit = gaugeVal * riskAmount;
+        // Update UI
+        document.getElementById("phaseLbl").textContent = res.name;
+        document.getElementById("chartLine").setAttribute("d", "M " + history.map((v,i) => `${(i/(history.length-1))*100},${20 - v*15}`).join(" L "));
+        
+        const profit = gaugeVal * (bank * (speedPct / 100));
+        const gV = document.getElementById("gaugeValue");
+        gV.textContent = (profit >= 0 ? "+$" : "-$") + Math.abs(Math.floor(profit));
+        gV.style.color = profit >= 0 ? "#00ff94" : "#ff2251";
 
-        // Mise à jour UI
-        drawChart();
-        const gFill = document.getElementById("gaugeFill");
-        const gTxt = document.getElementById("gaugeValue");
-        
-        gTxt.textContent = (currentProfit >= 0 ? "+" : "") + Math.floor(currentProfit);
-        gTxt.style.color = currentProfit >= 0 ? "#00ff94" : "#ff2251";
-        
-        const visualPct = 50 + (gaugeVal * 50);
-        gFill.style.width = Math.max(0, Math.min(100, visualPct)) + "%";
-        gFill.style.background = currentProfit >= 0 ? "#00ff94" : "#ff2251";
+        const fill = document.getElementById("gaugeFill");
+        fill.style.width = Math.abs(gaugeVal * 50) + "%";
+        fill.style.left = gaugeVal >= 0 ? "50%" : (50 - Math.abs(gaugeVal * 50)) + "%";
+        fill.style.background = profit >= 0 ? "#00ff94" : "#ff2251";
 
         if (phase === "holding") rafId = requestAnimationFrame(loop);
     }
@@ -275,23 +253,29 @@ btn.addEventListener("pointerdown", (e) => {
 btn.addEventListener("pointerup", () => {
     if (phase !== "holding") return;
     cancelAnimationFrame(rafId);
-    
-    const riskAmount = bank * (speedPct / 100);
-    const finalProfit = gaugeVal * riskAmount;
-    
-    bank += finalProfit;
-    if (bank < 0) bank = 0;
-    
     phase = "result";
+    const profit = gaugeVal * (bank * (speedPct / 100));
+    bank += profit;
+    
     document.getElementById("gameControls").style.display = "none";
     document.getElementById("resultBox").style.display = "block";
-    document.getElementById("resAmt").textContent = (finalProfit >= 0 ? "+" : "") + Math.floor(finalProfit);
-    document.getElementById("resAmt").style.color = finalProfit >= 0 ? "#00ff94" : "#ff2251";
-    
+    document.getElementById("resAmt").textContent = (profit >= 0 ? "+$" : "-$") + Math.abs(Math.floor(profit));
+    document.getElementById("resAmt").style.color = profit >= 0 ? "#00ff94" : "#ff2251";
+    document.getElementById("charEmoji").textContent = profit >= 0 ? "🤑" : "😭";
     updateUI();
 });
 
-// INITIALISATION ET NAV
+function nextRound() {
+    phase = "betting";
+    document.getElementById("gameControls").style.display = "flex";
+    document.getElementById("resultBox").style.display = "none";
+    btn.textContent = "JOUER";
+    btn.style.background = "radial-gradient(circle, #ff2251, #aa1535)";
+    document.getElementById("charEmoji").textContent = "😐";
+    if (bank <= 10) bank = 1000;
+    updateUI();
+}
+
 function updateUI() {
     document.getElementById("bankAmt").textContent = `$${Math.floor(bank).toLocaleString()}`;
     document.getElementById("speedVal").textContent = speedPct + "%";
@@ -300,21 +284,10 @@ function updateUI() {
     lbl.style.color = speedPct < 40 ? "#00ff94" : speedPct < 75 ? "#ff9f1e" : "#ff2251";
 }
 
-function showView(v) {
-    document.getElementById('view-game').style.display = (v === 'game') ? 'block' : 'none';
-    document.getElementById('view-shop').style.display = (v === 'shop') ? 'block' : 'none';
-    document.getElementById('view-apt').style.display = (v === 'apt') ? 'block' : 'none';
-}
-
-function nextRound() {
-    phase = "betting";
-    document.getElementById("gameControls").style.display = "block";
-    document.getElementById("resultBox").style.display = "none";
-    btn.textContent = "JOUER";
-    btn.style.background = "radial-gradient(circle, #ff2251, #aa1535)";
-    if (bank <= 0) { bank = 1000; alert("Banqueroute ! Le boss te prête 1000$."); }
+document.getElementById("speedSlider").addEventListener("input", function() {
+    speedPct = this.value;
     updateUI();
-}
+});
 
 updateUI();
 </script>
