@@ -1,370 +1,161 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-<meta name="apple-mobile-web-app-capable" content="yes"/>
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-<title>GREED</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
-<style>
-*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-html,body{height:100%;background:#0d0a06;overflow-x:hidden;}
-body{font-family:'DM Mono','Courier New',monospace;user-select:none;-webkit-user-select:none;}
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+    <title>GREED</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
+    <style>
+        *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+        html,body{height:100%;background:#0d0a06;overflow-x:hidden;color: #fff;}
+        body{font-family:'DM Mono',monospace;user-select:none;-webkit-user-select:none;}
 
-@keyframes shake{0%,100%{transform:translate(0)}15%{transform:translate(-7px,3px)}30%{transform:translate(7px,-3px)}45%{transform:translate(-4px,4px)}60%{transform:translate(4px,-2px)}90%{transform:translate(2px,-1px)}}
-@keyframes flashOut{0%{opacity:1}100%{opacity:0}}
-@keyframes slideUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:0.15}}
-@keyframes achSlide{from{opacity:0;transform:translateY(-28px)}to{opacity:1;transform:translateY(0)}}
-@keyframes btnPulse{0%,100%{box-shadow:0 8px 0 #2a0a00,0 0 30px rgba(255,80,0,0.35)}50%{box-shadow:0 8px 0 #2a0a00,0 0 55px rgba(255,80,0,0.65)}}
-@keyframes charBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+        /* Animations */
+        @keyframes blink{0%,100%{opacity:1}50%{opacity:0.15}}
+        @keyframes slideUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
 
-#flash{position:fixed;inset:0;z-index:200;pointer-events:none;display:none;}
-#achiev{position:fixed;top:0;left:0;right:0;z-index:600;display:none;justify-content:center;padding:18px 16px 0;pointer-events:none;}
+        /* Layout */
+        .page{width:100%; max-width:480px; margin:0 auto; padding:20px; display:flex; flex-direction:column; gap:12px;}
+        
+        .topbar{display:flex; justify-content:space-between; align-items:center; padding-bottom:12px; border-bottom:1px solid rgba(255,160,30,0.2);}
+        .logo{font-size:11px; letter-spacing:6px; color:rgba(255,160,30,0.7); font-weight:500;}
+        
+        .nav-btn {background:rgba(255,160,30,0.1); border:1px solid rgba(255,160,30,0.3); color:#ff9f1e; font-size:8px; padding:6px 10px; border-radius:4px; cursor:pointer;}
 
-/* Layout principal */
-.page{
-  width:100%;
-  min-height:100vh;
-  max-width:480px;
-  margin:0 auto;
-  padding:24px 20px 40px;
-  display:flex;
-  flex-direction:column;
-  gap:12px;
-  position:relative;
-}
+        /* Banque */
+        .bank-wrap{text-align:center; padding:10px 0;}
+        .bank-amount{font-size:48px; font-weight:300; letter-spacing:-1px; color:#fff;}
 
-/* Bordure arcade subtile sur les côtés */
-.page::before{
-  content:'';
-  position:fixed;
-  top:0;left:50%;
-  transform:translateX(-50%);
-  width:100%;max-width:480px;
-  height:100vh;
-  border-left:2px solid rgba(255,160,30,0.18);
-  border-right:2px solid rgba(255,160,30,0.18);
-  pointer-events:none;
-  z-index:5;
-}
+        /* Vues Sub */
+        .sub-view { display:none; animation: slideUp 0.3s ease; padding-top: 10px; }
+        .back-btn { width: 100%; margin-top: 20px; background: #333; color: #fff; border: none; padding: 12px; border-radius: 6px; font-family: inherit; font-size: 10px; letter-spacing: 2px; }
 
-/* Header top bar */
-.topbar{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding-bottom:12px;
-  border-bottom:1px solid rgba(255,160,30,0.2);
-}
-.logo{font-size:11px;letter-spacing:8px;color:rgba(255,160,30,0.7);font-weight:500;}
-.round-info{font-size:9px;color:rgba(255,255,255,0.25);letter-spacing:2px;text-align:right;}
+        /* Boutique */
+        .shop-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .shop-item { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 15px; text-align: center; border-radius: 8px; }
+        .shop-item img { width: 60px; height: 60px; object-fit: contain; margin-bottom: 10px; }
+        .shop-item span { font-size: 10px; display: block; margin-bottom: 8px; color: #aaa; }
+        .buy-btn { background: #ff9f1e; border: none; color: #000; font-weight: bold; padding: 6px 12px; border-radius: 4px; width: 100%; }
 
-/* Banque */
-.bank-wrap{text-align:center;padding:4px 0;}
-.bank-amount{font-size:52px;font-weight:300;letter-spacing:-2px;line-height:1;color:#fff;font-variant-numeric:tabular-nums;text-shadow:0 0 30px rgba(255,160,30,0.2);}
-.bank-record{font-size:9px;color:rgba(255,160,30,0.4);letter-spacing:3px;margin-top:4px;}
+        /* Appartement */
+        .apt-room { width: 100%; height: 220px; background: #000; border: 1px solid #ff9f1e; position: relative; border-radius: 8px; overflow: hidden; }
+        .apt-bg { width: 100%; height: 100%; object-fit: cover; opacity: 0.5; }
 
-/* Char + Boss */
-.char-row{display:flex;align-items:flex-end;gap:12px;min-height:90px;}
-.char-emoji{font-size:64px;line-height:1;flex-shrink:0;}
-.char-emoji.bob{animation:charBob 0.4s ease-in-out infinite;}
-.boss-bubble{flex:1;}
-.boss-inner{background:linear-gradient(135deg,#1a1a2e,#16213e);border:1px solid rgba(255,180,0,0.25);border-radius:0 12px 12px 12px;padding:10px 12px;font-size:11px;color:rgba(255,220,100,0.9);line-height:1.5;font-style:italic;box-shadow:0 4px 20px rgba(0,0,0,0.5);}
-.boss-name{font-size:8px;color:rgba(255,180,0,0.5);letter-spacing:2px;display:block;margin-bottom:3px;font-style:normal;}
-.market-blink{flex:1;font-size:10px;color:rgba(255,160,30,0.45);letter-spacing:2px;text-align:right;animation:blink 0.8s ease-in-out infinite;line-height:1.6;}
+        /* Jeu (Charts/Gauges) */
+        .chart-box{background:rgba(0,0,0,0.4); border:1px solid rgba(255,160,30,0.15); border-radius:6px; padding:10px; position:relative; min-height:80px;}
+        .gauge-track{height:16px; background:rgba(0,0,0,0.5); border-radius:8px; position:relative; overflow:hidden; border:1px solid rgba(255,160,30,0.15); margin: 10px 0;}
+        .gauge-fill{position:absolute; height:100%; border-radius:8px; transition: width 0.1s;}
+        .gauge-val{font-size:24px; font-weight:500; text-align: right;}
 
-/* Chart */
-.chart-box{background:rgba(0,0,0,0.4);border:1px solid rgba(255,160,30,0.15);border-radius:6px;padding:8px 6px 6px;position:relative;overflow:hidden;}
-.chart-midline{position:absolute;top:50%;left:6px;right:6px;height:1px;background:rgba(255,255,255,0.06);transform:translateY(-50%);}
-.chart-live{position:absolute;top:5px;right:8px;font-size:8px;color:rgba(255,160,30,0.3);letter-spacing:2px;}
-.phase-lbl{position:absolute;top:5px;left:8px;font-size:8px;letter-spacing:2px;}
+        .speed-box{background:rgba(0,0,0,0.3); border:1px solid rgba(255,160,30,0.1); border-radius:8px; padding:15px;}
+        input[type=range]{width:100%; height:6px; -webkit-appearance:none; background:#222; border-radius:3px; margin: 15px 0;}
+        input[type=range]::-webkit-slider-thumb{-webkit-appearance:none; width:20px; height:20px; border-radius:50%; background:#ff9f1e;}
 
-/* Gauge */
-.gauge-box{display:flex;flex-direction:column;gap:6px;}
-.gauge-header{display:flex;justify-content:space-between;align-items:center;}
-.gauge-title{font-size:8px;color:rgba(255,255,255,0.2);letter-spacing:3px;}
-.gauge-val{font-size:22px;font-weight:500;transition:color 0.1s;}
-.gauge-track{position:relative;height:16px;background:rgba(0,0,0,0.5);border-radius:8px;overflow:hidden;border:1px solid rgba(255,160,30,0.15);box-shadow:inset 0 2px 6px rgba(0,0,0,0.6);}
-.gauge-center-line{position:absolute;left:50%;top:0;bottom:0;width:2px;background:rgba(255,255,255,0.18);transform:translateX(-50%);z-index:2;}
-.gauge-fill{position:absolute;top:0;bottom:0;border-radius:8px;}
-.gauge-rel-fill{position:absolute;top:0;bottom:0;border-radius:8px;}
-.gauge-marker{position:absolute;top:-1px;bottom:-1px;width:3px;transform:translateX(-50%);z-index:3;border-radius:2px;}
-.gauge-footer{display:flex;justify-content:space-between;font-size:8px;color:rgba(255,255,255,0.12);letter-spacing:1px;}
-.release-lbl{font-size:8px;letter-spacing:2px;}
-
-/* Speed */
-.speed-box{border-radius:6px;padding:12px 14px;background:rgba(0,0,0,0.3);transition:opacity 0.3s,border-color 0.3s;}
-.speed-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
-.speed-tag{font-size:8px;color:rgba(255,255,255,0.25);letter-spacing:3px;display:block;}
-.speed-label{font-size:10px;letter-spacing:2px;}
-.speed-val{font-size:24px;font-weight:500;}
-.speed-bet{font-size:9px;color:rgba(255,255,255,0.3);margin-left:6px;}
-.speed-footer{display:flex;justify-content:space-between;margin-top:6px;font-size:8px;color:rgba(255,255,255,0.12);letter-spacing:1px;}
-input[type=range]{-webkit-appearance:none;width:100%;height:5px;border-radius:3px;outline:none;display:block;}
-input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;cursor:pointer;}
-input[type=range]:disabled{opacity:0.2;}
-
-/* Button */
-.btn-wrap{display:flex;justify-content:center;position:relative;padding:8px 0;}
-.btn-shadow{position:absolute;bottom:8px;width:130px;height:20px;border-radius:50%;background:rgba(0,0,0,0.6);filter:blur(10px);}
-#holdBtn{position:relative;width:130px;height:130px;border-radius:50%;border:none;cursor:pointer;outline:none;touch-action:none;display:flex;align-items:center;justify-content:center;flex-direction:column;transition:transform 0.05s,box-shadow 0.05s,background 0.15s;}
-#holdBtn .shine{position:absolute;top:12%;left:20%;width:45%;height:30%;background:radial-gradient(ellipse,rgba(255,255,255,0.3) 0%,transparent 100%);border-radius:50%;pointer-events:none;}
-#holdBtn span{font-size:9px;letter-spacing:3px;font-weight:500;color:rgba(255,255,255,0.9);text-shadow:0 1px 3px rgba(0,0,0,0.8);position:relative;text-align:center;line-height:1.4;}
-
-/* Result */
-.result-box{animation:slideUp 0.3s ease;}
-.result-card{padding:14px 16px;margin-bottom:10px;border-radius:6px;display:flex;justify-content:space-between;align-items:center;}
-.res-label{font-size:8px;color:rgba(255,255,255,0.25);letter-spacing:2px;margin-bottom:3px;}
-.res-amount{font-size:28px;font-weight:500;}
-.res-bank{font-size:24px;font-weight:300;color:#fff;}
-.dead-msg{text-align:center;padding:8px;font-size:8px;letter-spacing:3px;border-radius:4px;margin-bottom:10px;color:rgba(255,34,81,0.4);border:1px solid rgba(255,34,81,0.1);}
-.arcade-btn{width:100%;padding:16px 0;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:5px;font-weight:500;border-radius:6px;cursor:pointer;display:block;transition:all 0.1s;}
-
-.nav-btn {
-    background: rgba(255, 160, 30, 0.1);
-    border: 1px solid rgba(255, 160, 30, 0.3);
-    color: #ff9f1e;
-    font-size: 8px;
-    padding: 4px 8px;
-    border-radius: 4px;
-    cursor: pointer;
-}
-.sub-view { animation: slideUp 0.3s ease; }
-.apt-room {
-    width: 100%;
-    height: 250px;
-    background: #000;
-    border: 2px solid #ff9f1e;
-    position: relative;
-    overflow: hidden;
-    border-radius: 8px;
-}
-.apt-bg { width: 100%; height: 100%; object-fit: cover; opacity: 0.6; }
-.shop-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
-.shop-item {
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.1);
-    padding: 10px;
-    text-align: center;
-    border-radius: 6px;
-}
-.shop-item img { width: 40px; height: 40px; display: block; margin: 0 auto 5px; }
-.shop-item span { font-size: 9px; display: block; color: #ccc; margin-bottom: 5px; }
-.shop-item button {
-    background: #ff9f1e;
-    border: none;
-    color: #000;
-    font-weight: bold;
-    font-size: 10px;
-    padding: 4px 8px;
-    border-radius: 3px;
-}
-
-</style>
+        /* Bouton Action */
+        .btn-wrap{display:flex; justify-content:center; padding:20px 0;}
+        #holdBtn{width:120px; height:120px; border-radius:50%; border:none; color:#fff; font-weight:bold; font-family:inherit; cursor:pointer; font-size: 12px; letter-spacing: 2px;}
+    </style>
 </head>
 <body>
 
-<div id="flash"></div>
-<div id="achiev">
-  <div id="achInner" style="border-radius:12px;padding:14px 20px;display:flex;align-items:center;gap:14px;max-width:380px;">
-    <div id="achEmoji" style="font-size:36px"></div>
-    <div>
-      <div id="achTag" style="font-size:8px;letter-spacing:4px;margin-bottom:3px;">SUCCÈS DÉBLOQUÉ</div>
-      <div id="achLabel" style="font-size:14px;font-weight:700;color:#fff;"></div>
-      <div id="achDesc" style="font-size:10px;color:rgba(255,255,255,0.45);margin-top:2px;"></div>
-    </div>
-  </div>
-</div>
-
-<div id="view-apt" class="sub-view" style="display:none;">
-    <div class="apt-room" id="aptRoom">
-        <img src="images/appart_vide.png" class="apt-bg">
-        <div id="apt-items-layer"></div>
-    </div>
-    <div class="apt-stats">Niveau de confort : <span id="comfort-lvl">Basique</span></div>
-</div>
-
-<div id="view-shop" class="sub-view" style="display:none;">
-    <div class="shop-grid">
-        <div class="shop-item">
-            <img src="images/item_setup.png">
-            <span>PC GAMER</span>
-            <button onclick="buyItem('setup', 2500)">$2.5K</button>
-        </div>
-        <div class="shop-item">
-            <img src="images/item_canape.png">
-            <span>CANAPÉ CUIR</span>
-            <button onclick="buyItem('canape', 5000)">$5K</button>
+<div class="page">
+    <div class="topbar">
+        <div class="logo">◈ GREED ◈</div>
+        <div style="display:flex; gap:8px;">
+            <button class="nav-btn" onclick="showView('apt')">🏠 LOGIS</button>
+            <button class="nav-btn" onclick="showView('shop')">🛒 SHOP</button>
         </div>
     </div>
-</div>
 
-<div class="page" id="page">
-
-  <!-- Top Bar -->
- <div class="topbar">
-    <div class="logo" onclick="showView('game')" style="cursor:pointer">◈ GREED ◈</div>
-    <div style="display:flex; gap:10px;">
-        <button class="nav-btn" onclick="showView('apt')">🏠 LOGIS</button>
-        <button class="nav-btn" onclick="showView('shop')">🛒 SHOP</button>
+    <div class="bank-wrap">
+        <div class="bank-amount" id="bankAmt">$1 000</div>
     </div>
-</div>
 
-  <!-- Banque -->
-  <div class="bank-wrap">
-    <div class="bank-amount" id="bankAmt">$1 000</div>
-    <div class="bank-record" id="bankRecord" style="display:none"></div>
-  </div>
+    <div id="view-game">
+        <div class="chart-box">
+            <svg id="chartSvg" width="100%" height="60" style="display:block;">
+                <path id="chartLine" d="" fill="none" stroke="#00ff94" stroke-width="2"/>
+            </svg>
+            <div id="marketLbl" style="position:absolute; top:5px; right:10px; font-size:8px; color:#ff9f1e; animation:blink 1s infinite; display:none;">MARCHÉ EN COURS...</div>
+        </div>
 
-  <!-- Char + Boss -->
-  <div class="char-row">
-    <div class="char-emoji" id="charEmoji">😐</div>
-    <div class="boss-bubble" id="bossBubble">
-      <div class="boss-inner">
-        <span class="boss-name">M. BERNARD — DG</span>
-        <span id="bossText">Prouve-moi que c'était pas un accident.</span>
-      </div>
+        <div class="gauge-section">
+            <div class="gauge-val" id="gaugeVal">———</div>
+            <div class="gauge-track">
+                <div class="gauge-fill" id="gFill"></div>
+            </div>
+        </div>
+
+        <div class="speed-box">
+            <div style="display:flex; justify-content:space-between; font-size:10px;">
+                <span id="speedLbl" style="color:#00ff94">SÉCURISÉ</span>
+                <span id="speedVal">30%</span>
+            </div>
+            <input type="range" id="speedSlider" min="10" max="100" step="5" value="30"/>
+        </div>
+
+        <div class="btn-wrap" id="btnWrap">
+            <button id="holdBtn" style="background: radial-gradient(circle, #ff2251, #aa1535);">JOUER</button>
+        </div>
+
+        <div id="resultBox" style="display:none; text-align:center;">
+            <div id="resAmt" style="font-size:32px; margin-bottom:10px;">+0</div>
+            <button class="back-btn" onclick="nextRound()" style="background:#ff9f1e; color:#000;">ROUND SUIVANT</button>
+        </div>
     </div>
-    <div class="market-blink" id="marketLbl" style="display:none">MARCHÉ<br/>EN COURS...</div>
-  </div>
 
-  <!-- Chart -->
-  <div class="chart-box">
-    <div class="chart-midline"></div>
-    <svg id="chartSvg" width="100%" viewBox="0 0 300 55" preserveAspectRatio="none" style="display:block;height:55px;">
-      <defs>
-        <linearGradient id="cg" x1="0" y1="0" x2="0" y2="1">
-          <stop id="cgT" offset="0%" stop-color="#00ff94" stop-opacity="0.4"/>
-          <stop id="cgB" offset="100%" stop-color="#00ff94" stop-opacity="0.02"/>
-        </linearGradient>
-      </defs>
-      <text id="chartHint" x="150" y="32" text-anchor="middle" fill="rgba(255,255,255,0.08)" font-size="9" font-family="DM Mono">appuie sur le bouton</text>
-      <path id="chartArea" d="" fill="url(#cg)" style="display:none"/>
-      <path id="chartLine" d="" fill="none" stroke-width="2.5" stroke-linejoin="round" style="display:none"/>
-    </svg>
-    <div class="phase-lbl" id="phaseLbl" style="display:none"></div>
-    <div class="chart-live">LIVE</div>
-  </div>
-
-  <!-- Gauge -->
-  <div class="gauge-box">
-    <div class="gauge-header">
-      <span class="gauge-title">GAIN / PERTE</span>
-      <span class="gauge-val" id="gaugeVal">———</span>
+    <div id="view-shop" class="sub-view">
+        <div class="shop-grid">
+            <div class="shop-item">
+                <img src="images/item_setup.png" onerror="this.src='https://via.placeholder.com/60?text=PC'">
+                <span>PC GAMER</span>
+                <button class="buy-btn" onclick="buyItem('setup', 2500)">$2.5K</button>
+            </div>
+            <div class="shop-item">
+                <img src="images/item_canape.png" onerror="this.src='https://via.placeholder.com/60?text=SOFA'">
+                <span>CANAPÉ</span>
+                <button class="buy-btn" onclick="buyItem('canape', 5000)">$5K</button>
+            </div>
+        </div>
+        <button class="back-btn" onclick="showView('game')">↩ RETOUR AU BUREAU</button>
     </div>
-    <div class="gauge-track">
-      <div class="gauge-center-line"></div>
-      <div class="gauge-fill" id="gFill" style="display:none"></div>
-      <div class="gauge-rel-fill" id="gRelFill" style="display:none"></div>
-      <div class="gauge-marker" id="gMarker" style="display:none"></div>
-    </div>
-    <div class="gauge-footer">
-      <span>− PERTE MAX</span>
-      <span class="release-lbl" id="relLbl" style="display:none"></span>
-      <span>GAIN MAX +</span>
-    </div>
-  </div>
 
-  <!-- Speed -->
-  <div class="speed-box" id="speedBox">
-    <div class="speed-header">
-      <div>
-        <span class="speed-tag">VITESSE</span>
-        <span class="speed-label" id="speedLbl">SÉCURISÉ</span>
-      </div>
-      <div style="text-align:right;">
-        <span class="speed-val" id="speedVal">30%</span>
-        <span class="speed-bet" id="speedBet">mise ~$240</span>
-      </div>
+    <div id="view-apt" class="sub-view">
+        <div class="apt-room">
+            <img src="images/appart_vide.png" class="apt-bg" onerror="this.style.background='#111'">
+            <div id="apt-items-layer"></div>
+        </div>
+        <div style="padding:15px; font-size:10px; color:#ff9f1e;">LOGEMENT ACTUEL : STUDIO ÉCO</div>
+        <button class="back-btn" onclick="showView('game')">↩ RETOUR AU BUREAU</button>
     </div>
-    <input type="range" id="speedSlider" min="10" max="100" step="5" value="30"/>
-    <div class="speed-footer"><span>LENT</span><span>NORMAL</span><span>YOLO 🔥</span></div>
-  </div>
-
-  <!-- Button -->
-  <div class="btn-wrap" id="btnWrap">
-    <div class="btn-shadow"></div>
-    <button id="holdBtn">
-      <div class="shine"></div>
-      <span id="btnTxt">JOUER</span>
-    </button>
-  </div>
-
-  <!-- Result -->
-  <div class="result-box" id="resultBox" style="display:none;">
-    <div class="result-card" id="resultCard">
-      <div>
-        <div class="res-label" id="resLbl">ENCAISSÉ</div>
-        <div class="res-amount" id="resAmt">+$0</div>
-      </div>
-      <div style="text-align:right;">
-        <div class="res-label">BANQUE</div>
-        <div class="res-bank" id="resBank">$1 000</div>
-      </div>
-    </div>
-    <div class="dead-msg" id="deadMsg" style="display:none;"></div>
-    <button class="arcade-btn" id="actionBtn" onclick="doAction()">▶  ROUND SUIVANT</button>
-  </div>
-
 </div>
 
 <script>
-// --- VARIABLES GLOBALES (CRUCIAL) ---
-let bank = 1000; 
-let ownedItems = []; 
+let bank = 1000;
 let speedPct = 30;
 let gaugeVal = 0;
-let gPhase = "calm";
-let phase = "betting";
-let result = null;
-let bestBank = 1000;
-let round = 1;
+let phase = "betting"; 
 let history = [];
-let releaseVal = null;
-let pressed = false;
-let unlocked = [];
-let popTimer = null;
-
-const osc = createOsc();
 let rafId = null;
-let lastT = null;
+let ownedItems = [];
 
-// --- GESTION DES VUES ---
-function showView(view) {
-    const gameElements = [
-        document.querySelector('.bank-wrap'),
-        document.querySelector('.char-row'),
-        document.querySelector('.chart-box'),
-        document.querySelector('.gauge-box'),
-        document.querySelector('.speed-box'),
-        document.querySelector('#btnWrap'),
-        document.querySelector('#resultBox')
-    ];
-
-    if (view === 'game') {
-        gameElements.forEach(el => { if(el) el.style.display = 'block' });
-        document.getElementById('view-apt').style.display = 'none';
-        document.getElementById('view-shop').style.display = 'none';
-    } else {
-        gameElements.forEach(el => { if(el) el.style.display = 'none' });
-        document.getElementById('view-apt').style.display = (view === 'apt') ? 'block' : 'none';
-        document.getElementById('view-shop').style.display = (view === 'shop') ? 'block' : 'none';
-    }
-    updateUI();
+// NAVIGATION
+function showView(v) {
+    document.getElementById('view-game').style.display = (v === 'game') ? 'block' : 'none';
+    document.getElementById('view-shop').style.display = (v === 'shop') ? 'block' : 'none';
+    document.getElementById('view-apt').style.display = (v === 'apt') ? 'block' : 'none';
 }
 
-// --- BOUTIQUE ET APPARTEMENT ---
+// BOUTIQUE
 function buyItem(id, price) {
     if (bank >= price) {
         bank -= price;
         ownedItems.push(id);
-        updateUI(); 
+        updateUI();
         renderApartment();
-        alert("ACHAT RÉUSSI ! Objet livré dans ton logis.");
+        alert("ACHAT EFFECTUÉ !");
     } else {
-        alert("SOLDE INSUFFISANT. Retourne travailler.");
+        alert("FONDS INSUFFISANTS !");
     }
 }
 
@@ -373,149 +164,102 @@ function renderApartment() {
     layer.innerHTML = "";
     ownedItems.forEach(item => {
         const img = document.createElement('img');
-        // VÉRIFIE BIEN QUE TES FICHIERS SUR GITHUB ONT CES NOMS EXACTS
-        img.src = `images/item_${item}.png`; 
+        img.src = `images/item_${item}.png`;
         img.style.position = "absolute";
-        
-        if(item === 'setup') { 
-            img.style.left="20px"; 
-            img.style.bottom="40px"; 
-            img.style.width="120px"; 
-        }
-        if(item === 'canape') { 
-            img.style.right="10px"; 
-            img.style.bottom="20px"; 
-            img.style.width="150px"; 
-        }
+        img.style.width = "70px";
+        if(item === 'setup') { img.style.bottom = "20px"; img.style.left = "20px"; }
+        if(item === 'canape') { img.style.bottom = "10px"; img.style.right = "20px"; }
         layer.appendChild(img);
     });
 }
 
-// --- RESTE DU MOTEUR DE JEU (FONCTIONS EXISTANTES) ---
-const fmt=n=>{const a=Math.abs(n),s=n<0?"-":"+";return a>=1e6?`${s}$${(a/1e6).toFixed(2)}M`:a>=1e3?`${s}$${(a/1e3).toFixed(1)}K`:`${s}$${a.toFixed(0)}`;};
-const fmtB=n=>n>=1e6?`$${(n/1e6).toFixed(2)}M`:n>=1e3?`$${(n/1e3).toFixed(1)}K`:`$${n.toFixed(0)}`;
-const pick=a=>a[Math.floor(Math.random()*a.length)];
-
-const BOSS_WIN=["Bien joué… pour une fois.","Bravo ! Tu vois, quand tu te concentres...","Pas mal. Va te chercher un café.","Super résultat !","Excellent !"];
-const BOSS_LOSE=["Ah… bah. C'est pas grave.","Intéressant choix.","C'est de l'expérience.","J'aurais pas fait ça.","C'était quoi le plan ?"];
-const BOSS_DEAD=["Rendez-vous RH lundi.","Liquidé.","T'as du courage...","Je vais appeler ta mère."];
-const BOSS_IDLE=["Prouve-moi que c'était pas un accident.","Le marché n'attend pas.","T'es là pour quoi ?","Allez on y va."];
-const CHAR={idle:"😐",hold:"😰",win:"🤑",lose:"😭",dead:"💀"};
-const ACHIEVEMENTS=[
-  {id:"10k",emoji:"💎",label:"PREMIER PALIER",desc:"Atteindre $10 000",check:b=>b>=10000,color:"#FFD700"},
-  {id:"50k",emoji:"🚀",label:"EN ORBITE",desc:"Atteindre $50 000",check:b=>b>=50000,color:"#00cfff"},
-];
-
-function createOsc(){
-  const C=[{l:"calm",d:[800,1400],dr:0,n:0.3},{l:"build",d:[600,1000],dr:0.5,n:0.2},{l:"fake_pump",d:[400,700],dr:2.2,n:0.15},{l:"trap_drop",d:[300,600],dr:-3.2,n:0.4},{l:"recovery",d:[500,900],dr:0.7,n:0.3}];
-  let pi=0,pt=0,pT=0,v=0,vel=0;
-  const r=(a,b)=>a+Math.random()*(b-a); pT=r(...C[0].d);
-  return{
-    tick(dt,sm=1){const adt=dt*sm;pt+=adt;if(pt>=pT){pi=(pi+1)%C.length;pt=0;pT=r(...C[pi].d);}const p=C[pi];vel=vel*0.88+(-v*0.04)+(p.dr*0.012*sm)+((Math.random()*2-1)*p.n*0.5*sm);v=Math.max(-1,Math.min(1,v+vel*(adt/16)));return{value:v,phase:p.l};},
-    reset(){pi=0;pt=0;v=0;vel=0;pT=r(...C[0].d);}
-  };
-}
-
-const sm=()=>0.3+(speedPct-10)/90*2.7;
-const eb=()=>bank*Math.min(1,(speedPct/100)*sm()*0.8);
-const gc=v=>v>0.5?"#00ff94":v>0?"#aaff44":v>-0.35?"#ffee00":"#ff2251";
-const sc=()=>speedPct<35?"#00ff94":speedPct<65?"#ffee00":speedPct<85?"#ff9900":"#ff2251";
-const rl=()=>speedPct<35?"SÉCURISÉ":speedPct<65?"MODÉRÉ":speedPct<85?"RISQUÉ":"EXTRÊME 🔥";
-
-function updateUI(){
-  const isB=phase==="betting",isH=phase==="holding",isR=phase==="result",isD=phase==="dead";
-  const color=gc(gaugeVal), spColor=sc(), gPos=gaugeVal>=0, pd=gaugeVal*eb();
-  const charKey=isD?"dead":isH?"hold":(isR&&result?.won)?"win":(isR&&result&&!result.won)?"lose":"idle";
-
-  document.getElementById("bankAmt").textContent=fmtB(bank);
-  const ce=document.getElementById("charEmoji");
-  ce.textContent=CHAR[charKey];
-  ce.className="char-emoji"+(isH?" bob":"");
-
-  // Chart Logic
-  const hint=document.getElementById("chartHint");
-  const area=document.getElementById("chartArea");
-  const line=document.getElementById("chartLine");
-  hint.style.display=history.length<2?"block":"none";
-  if(history.length>1){
-    const W=300,mid=27;
-    const pts="M "+history.map((v,i)=>`${(i/(history.length-1))*W},${mid-v*(mid*0.88)}`).join(" L ");
-    area.setAttribute("d",pts+` L300,27 L0,27 Z`); area.style.display="block";
-    line.setAttribute("d",pts); line.setAttribute("stroke",color);
-    line.style.display="block";
-    document.getElementById("cgT").setAttribute("stop-color",color);
-    document.getElementById("cgB").setAttribute("stop-color",color);
-  }
-
-  // Gauge
-  const gv=document.getElementById("gaugeVal");
-  gv.style.color=gPos?color:"#ff2251";
-  gv.textContent=isH?fmt(pd):releaseVal!==null?fmt(result?.delta||0):"———";
-  const gf=document.getElementById("gFill");
-  gf.style.display=isH?"block":"none";
-  if(isH){gf.style.left=gPos?"50%":`${50-Math.abs(gaugeVal)*50}%`;gf.style.width=`${Math.abs(gaugeVal)*50}%`;gf.style.background=color;}
-
-  // Speed
-  const sb=document.getElementById("speedBox");
-  sb.style.opacity=isH?"0.2":"1";
-  document.getElementById("speedLbl").textContent=rl();
-  document.getElementById("speedVal").textContent=speedPct+"%";
-  document.getElementById("speedBet").textContent="mise ~"+fmtB(eb());
-  
-  // Button
-  const btnTxt = document.getElementById("btnTxt");
-  if(btnTxt) btnTxt.textContent=isH?(gPos?"LÂCHER":"TENIR ?"):"JOUER";
-
-  // Result
-  const rb=document.getElementById("resultBox");
-  if(rb) rb.style.display=(isR||isD)&&result?"block":"none";
-}
-
-function startHolding(){
-  if(phase!=="betting")return;
-  phase="holding";pressed=true;osc.reset();history=[];lastT=null;
-  updateUI();
-  function loop(t){
-    if(!lastT)lastT=t;
-    const dt=t-lastT;lastT=t;
-    const{value,phase:ph}=osc.tick(dt,sm());
-    gaugeVal=value;gPhase=ph;
-    history=[...history.slice(-80),value];
+// LOGIQUE JEU
+const slider = document.getElementById("speedSlider");
+slider.addEventListener("input", () => {
+    speedPct = slider.value;
     updateUI();
-    rafId=requestAnimationFrame(loop);
-  }
-  rafId=requestAnimationFrame(loop);
+});
+
+function updateUI() {
+    document.getElementById("bankAmt").textContent = `$${Math.floor(bank).toLocaleString()}`;
+    document.getElementById("speedVal").textContent = speedPct + "%";
+    
+    const color = speedPct < 40 ? "#00ff94" : speedPct < 75 ? "#ff9f1e" : "#ff2251";
+    document.getElementById("speedLbl").textContent = speedPct < 40 ? "SÉCURISÉ" : speedPct < 75 ? "RISQUÉ" : "YOLO 🔥";
+    document.getElementById("speedLbl").style.color = color;
 }
 
-function doRelease(){
-  if(phase!=="holding")return;
-  if(rafId) cancelAnimationFrame(rafId);
-  pressed=false;
-  releaseVal=gaugeVal;
-  const delta=gaugeVal*eb();
-  bank=Math.max(0,bank+delta);
-  bestBank=Math.max(bestBank,bank);
-  const won=delta>=0;
-  result={delta,won};
-  document.getElementById("bossText").textContent=pick(won?BOSS_WIN:BOSS_LOSE);
-  if(bank<=0) phase="dead"; else phase="result";
-  updateUI();
+const btn = document.getElementById("holdBtn");
+btn.addEventListener("pointerdown", startPlay);
+btn.addEventListener("pointerup", stopPlay);
+
+function startPlay() {
+    if (phase !== "betting") return;
+    phase = "holding";
+    history = [];
+    document.getElementById("marketLbl").style.display = "block";
+    btn.textContent = "LÂCHER !";
+    btn.style.background = "radial-gradient(circle, #00ff94, #008855)";
+    
+    let startTime = Date.now();
+    function loop() {
+        let elapsed = (Date.now() - startTime) / 1000;
+        // Simulation de courbe
+        gaugeVal = Math.sin(elapsed * (speedPct/10)) * (speedPct/50) + (elapsed * 0.1);
+        
+        // Update Graph & Gauge
+        drawChart();
+        const displayVal = gaugeVal * (bank * (speedPct/100));
+        const gV = document.getElementById("gaugeVal");
+        gV.textContent = (displayVal >= 0 ? "+" : "") + Math.floor(displayVal);
+        gV.style.color = displayVal >= 0 ? "#00ff94" : "#ff2251";
+        
+        const fill = document.getElementById("gFill");
+        const visualWidth = Math.min(100, Math.max(0, 50 + (gaugeVal * 20)));
+        fill.style.width = visualWidth + "%";
+        fill.style.background = displayVal >= 0 ? "#00ff94" : "#ff2251";
+
+        rafId = requestAnimationFrame(loop);
+    }
+    loop();
 }
 
-function doAction(){
-  if(phase==="dead"){
-    bank=1000;round=1;phase="betting";
-  } else {
-    phase="betting";round++;
-  }
-  result=null;gaugeVal=0;history=[];releaseVal=null;
-  updateUI();
+function stopPlay() {
+    if (phase !== "holding") return;
+    cancelAnimationFrame(rafId);
+    phase = "result";
+    
+    const profit = gaugeVal * (bank * (speedPct/100));
+    bank += profit;
+    if (bank < 0) bank = 0;
+
+    document.getElementById("btnWrap").style.display = "none";
+    document.getElementById("marketLbl").style.display = "none";
+    document.getElementById("resultBox").style.display = "block";
+    const res = document.getElementById("resAmt");
+    res.textContent = (profit >= 0 ? "+" : "") + Math.floor(profit);
+    res.style.color = profit >= 0 ? "#00ff94" : "#ff2251";
+    updateUI();
 }
 
-document.getElementById("speedSlider").addEventListener("input",function(){speedPct=Number(this.value);updateUI();});
-const holdBtn=document.getElementById("holdBtn");
-holdBtn.addEventListener("pointerdown",e=>{e.preventDefault();startHolding();});
-holdBtn.addEventListener("pointerup",e=>{e.preventDefault();doRelease();});
+function nextRound() {
+    phase = "betting";
+    document.getElementById("btnWrap").style.display = "flex";
+    document.getElementById("resultBox").style.display = "none";
+    document.getElementById("gaugeVal").textContent = "———";
+    document.getElementById("gFill").style.width = "0%";
+    btn.textContent = "JOUER";
+    btn.style.background = "radial-gradient(circle, #ff2251, #aa1535)";
+    if(bank <= 0) { alert("BANQUEROUTE !"); bank = 1000; updateUI(); }
+}
+
+function drawChart() {
+    history.push(gaugeVal);
+    if (history.length > 50) history.shift();
+    const path = document.getElementById("chartLine");
+    let d = history.map((v, i) => `${(i/50)*100},${30 - v*10}`).join(" L ");
+    path.setAttribute("d", "M " + d);
+}
 
 updateUI();
 </script>
