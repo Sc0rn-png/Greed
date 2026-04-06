@@ -101,6 +101,15 @@ body{font-family:'DM Mono',monospace;user-select:none;-webkit-user-select:none;c
     </div>
 </div>
 
+<div style="background:rgba(0,0,0,0.3);padding:15px;border-radius:6px;">
+    <div style="display:flex;justify-content:space-between;margin-bottom:5px;font-size:10px;color:#ff9f1e;">
+        <span>VITESSE</span>
+        <span id="speedDisplay">30%</span>
+    </div>
+    
+    <input type="range" id="speedSlider" min="10" max="100" step="5" value="30" style="width:100%;accent-color:#ff9f1e;"/>
+</div>
+    
 <script>
 // --- LOGIQUE CORE (RÉTABLIE) ---
 let bank=1000, speedPct=30, gaugeVal=0, phase="betting", round=1, history=[], lastT=null, rafId=null;
@@ -192,7 +201,11 @@ function nextRound(){
     updateUI();
 }
 
-document.getElementById("speedSlider").addEventListener("input",function(){speedPct=this.value;});
+document.getElementById("speedSlider").addEventListener("input", function() {
+    speedPct = this.value;
+    // Cette ligne met à jour l'affichage du pourcentage
+    document.getElementById("speedDisplay").textContent = this.value + "%";
+});
 updateUI();
 </script>
 </body>
