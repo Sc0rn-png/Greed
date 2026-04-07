@@ -23,13 +23,27 @@ body{font-family:'DM Mono',monospace;user-select:none;-webkit-user-select:none;c
 .bank-amount{font-size: 5vh; margin: -5px 0;font-weight:300;letter-spacing:-2px;line-height:1;text-shadow:0 0 30px rgba(255,160,30,0.2);}
 
 /* CHARTE NÉON */
-.chart-box{background:rgba(0,0,0,0.4);border:1px solid rgba(255,160,30,0.15);border-radius:6px;padding:8px 0;position:relative;overflow:hidden;}
+.chart-box{background:rgba(0,0,0,0.4);border:1px solid rgba(255,160,30,0.15);margin-top: 0;border-radius:6px;padding:8px 0;position:relative;overflow:hidden;}
 .chart-midline{position:absolute;top:50%;left:0;right:0;height:1px;background:rgba(255,255,255,0.06);z-index:1;}
 .phase-lbl{position:absolute;top:5px;left:8px;font-size:8px;letter-spacing:2px;z-index:2;}
 
 /* BOSS */
-.char-row{display:flex;align-items:flex-end;gap:12px;min-height: auto;height: 15vh;margin-top: 0;}
-.char-emoji{font-size:64px;line-height:1;}
+.char-row {
+    display: flex;
+    align-items: flex-end; /* Aligne le boss et la bulle sur la ligne du bas */
+    gap: 12px;
+    min-height: auto;
+    height: 15vh;
+    margin-top: 0;
+    margin-bottom: 0; /* Supprime l'espace sous le boss */
+    padding-bottom: 0;
+}
+.char-emoji img {
+    display: block; /* Supprime l'espace réservé aux lettres descendantes */
+    width: 110px; 
+    height: auto;
+    margin-bottom: -1px; /* Petit hack pour mordre d'un pixel sur la charte et garantir le contact */
+}
 .boss-bubble{flex:1;background:linear-gradient(135deg,#1a1a2e,#16213e);border:1px solid rgba(255,180,0,0.25);border-radius:0 12px 12px 12px;padding:10px 12px;font-size:11px;color:rgba(255,220,100,0.9);line-height:1.5;font-style:italic;}
 
 /* GAUGE */
