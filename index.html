@@ -54,7 +54,12 @@ body{font-family:'DM Mono',monospace;user-select:none;-webkit-user-select:none;c
 .gauge-track{position:relative;height:16px;background:rgba(0,0,0,0.5);border-radius:8px;overflow:hidden;border:1px solid rgba(255,160,30,0.15);}
 .gauge-fill{position:absolute;top:0;bottom:0;border-radius:8px;left:50%;width:0%;}
 
-/* Conteneur principal de la boîte de vitesse */
+:root {
+    /* Couleur par défaut (SÉCURISÉ) */
+    --speed-color: #00f7c2;
+    --speed-glow: rgba(0, 247, 194, 0.6);
+}
+
 .speed-box {
     background: #000;
     padding: 15px;
@@ -62,52 +67,65 @@ body{font-family:'DM Mono',monospace;user-select:none;-webkit-user-select:none;c
     border: 1px solid #1a1a1a;
 }
 
-/* Organisation du haut : Gauche vs Droite */
 .speed-header {
     display: flex;
     justify-content: space-between;
     align-items: flex-end;
-    margin-bottom: 15px;
+    margin-bottom: 20px; /* Un peu plus d'espace */
 }
 
-/* Effet Néon sur les textes actifs */
+/* Titres et Pourcentage dynamiques */
 .speed-label, .speed-val {
-    color: #00f7c2; /* Cyan néon */
-    text-shadow: 0 0 10px rgba(0, 247, 194, 0.6);
-    font-weight: bold;
+    color: var(--speed-color);
+    text-shadow: 0 0 12px var(--speed-glow);
+    transition: all 0.3s ease;
 }
 
-/* Personnalisation du Slider (Barre) */
 #speedSlider {
     -webkit-appearance: none;
     width: 100%;
     height: 4px;
-    background: #222; /* Sera écrasé par le JS pour l'effet de remplissage */
     border-radius: 2px;
     outline: none;
+    background: #222;
+    cursor: pointer;
 }
 
-/* IMPORTANT : Permet de voir le remplissage cyan sur Chrome/Safari */
+/* Recentrage vertical du bouton */
 #speedSlider::-webkit-slider-runnable-track {
     background: transparent;
+    height: 4px; /* Même hauteur que le slider */
+    display: flex;
+    align-items: center;
 }
 
 #speedSlider::-webkit-slider-thumb {
     -webkit-appearance: none;
-    height: 16px;
-    width: 16px;
+    height: 18px;
+    width: 18px;
     border-radius: 50%;
-    background: #00f7c2;
-    box-shadow: 0 0 15px #00f7c2;
+    background: var(--speed-color);
+    box-shadow: 0 0 15px var(--speed-color);
     cursor: pointer;
-    margin-top: -6px; /* Centre le bouton sur la barre */
+    transition: background 0.3s ease, box-shadow 0.3s ease;
+    /* Le retrait du margin-top négatif aide au centrage selon les navigateurs */
+    margin-top: 0; 
 }
 
-/* Organisation du bas (LENT / NORMAL / RISQUE) */
+/* Pour Firefox */
+#speedSlider::-moz-range-thumb {
+    height: 18px;
+    width: 18px;
+    border: none;
+    border-radius: 50%;
+    background: var(--speed-color);
+    box-shadow: 0 0 15px var(--speed-color);
+}
+
 .speed-footer {
     display: flex;
     justify-content: space-between;
-    font-size: 10px;
+    font-size: 9px;
     color: #444;
     margin-top: 10px;
 }
@@ -174,7 +192,6 @@ body{font-family:'DM Mono',monospace;user-select:none;-webkit-user-select:none;c
         </div>
         <div style="text-align: right;">
             <span class="speed-val" id="speedVal">30%</span>
-            <div id="speedBet" style="font-size: 10px; color: #666;">mise ~$240</div>
         </div>
     </div>
     
@@ -260,38 +277,43 @@ function updateUI() {
 function updateSliderPos() {
     const slider = document.getElementById("speedSlider");
     const val = parseInt(slider.value);
-    const min = parseInt(slider.min) || 10;
-    const max = parseInt(slider.max) || 100;
+    const root = document.querySelector(':root');
     
-    // Calcul du pourcentage réel (0 à 100) pour le remplissage
-    const percent = ((val - min) * 100) / (max - min);
-    
-    // 1. Mise à jour de la variable globale de jeu
+    // 1. Mise à jour du texte
+    document.getElementById("speedVal").textContent = val + "%";
     speedPct = val;
 
-    // 2. Mise à jour du texte (ex: 30%)
-    const speedValEl = document.getElementById("speedVal");
-    if (speedValEl) speedValEl.textContent = val + "%";
-
-    // 3. REMPLISSAGE DE LA JAUGE (Le trait cyan qui suit le point)
-    // On utilise un dégradé linéaire dynamique sur le slider lui-même
-    slider.style.background = `linear-gradient(to right, #00f7c2 0%, #00f7c2 ${percent}%, #222 ${percent}%, #222 100%)`;
-
-    // 4. Calcul de la mise théorique affichée
-    const speedBetEl = document.getElementById("speedBet");
-    if (speedBetEl) {
-        const theoreticalBet = Math.floor(bank * (val / 100) * 0.8);
-        speedBetEl.textContent = `mise ~$${theoreticalBet}`;
+    // 2. Détermination du niveau et de la couleur
+    let color, glow, label;
+    
+    if (val < 40) {
+        color = "#00f7c2"; // Vert/Cyan
+        glow = "rgba(0, 247, 194, 0.6)";
+        label = "SÉCURISÉ";
+    } else if (val < 80) {
+        color = "#ffdd00"; // Jaune
+        glow = "rgba(255, 221, 0, 0.6)";
+        label = "AGRESSIF";
+    } else {
+        color = "#ff2251"; // Rouge
+        glow = "rgba(255, 34, 81, 0.6)";
+        label = "RISQUE MAX 🔥";
     }
 
-    // 5. Mise à jour du label de sécurité (SÉCURISÉ / RISQUE MAX)
-    const lbl = document.getElementById("speedLbl");
-    if (lbl) {
-        if (val < 40) lbl.textContent = "SÉCURISÉ";
-        else if (val < 80) lbl.textContent = "AGRESSIF";
-        else lbl.textContent = "RISQUE MAX🔥";
-    }
+    // 3. Application des couleurs aux variables CSS
+    root.style.setProperty('--speed-color', color);
+    root.style.setProperty('--speed-glow', glow);
+    document.getElementById("speedLbl").textContent = label;
+
+    // 4. Remplissage de la barre
+    const min = parseInt(slider.min);
+    const max = parseInt(slider.max);
+    const percent = ((val - min) * 100) / (max - min);
+    slider.style.background = `linear-gradient(to right, ${color} 0%, ${color} ${percent}%, #222 ${percent}%, #222 100%)`;
 }
+
+// Initialisation au chargement
+document.getElementById("speedSlider").addEventListener("input", updateSliderPos);
 
 // --- GESTION DU JEU ---
 const btn = document.getElementById("holdBtn");
