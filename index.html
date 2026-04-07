@@ -112,6 +112,11 @@ body{font-family:'DM Mono',monospace;user-select:none;-webkit-user-select:none;c
 </div>
 
 <script>
+
+const IMG_PATH = "images/"; // Le nom de ton dossier sur GitHub
+const BOSS_SURPRISE = IMG_PATH + "b_surprise.png"; // Vérifie bien l'extension (.png ou .jpg)
+const BOSS_NOTBAD = IMG_PATH + "b_notbad.png";
+    
 // --- LOGIQUE CORE (RÉTABLIE) ---
 let bank=1000, speedPct=30, gaugeVal=0, phase="betting", round=1, history=[], lastT=null, rafId=null;
 
@@ -201,16 +206,30 @@ updateSliderPos();
     rafId=requestAnimationFrame(loop);
 });
 
-btn.addEventListener("pointerup",()=>{
-    if(phase!=="holding") return;
-    phase="result";
+btn.addEventListener("pointerup", () => {
+    if (phase !== "holding") return;
+    phase = "result";
     cancelAnimationFrame(rafId);
-    const profit=Math.floor(gaugeVal*(bank*(speedPct/100)));
-    bank+=profit;
-    document.getElementById("btnWrap").style.display="none";
-    document.getElementById("resultBox").style.display="block";
-    document.getElementById("bossText").textContent=profit>=0?BOSS_WIN[Math.floor(Math.random()*3)]:BOSS_LOSE[Math.floor(Math.random()*3)];
-    document.getElementById("charEmoji").textContent=profit>=0?"🤑":"😭";
+    
+    const profit = Math.floor(gaugeVal * (bank * (speedPct / 100)));
+    bank += profit;
+    
+    document.getElementById("btnWrap").style.display = "none";
+    document.getElementById("resultBox").style.display = "block";
+    
+    // Gestion du texte du boss
+    document.getElementById("bossText").textContent = profit >= 0 ? BOSS_WIN[Math.floor(Math.random() * 3)] : BOSS_LOSE[Math.floor(Math.random() * 3)];
+    
+    // REMPLACEMENT DE L'EMOJI PAR TES IMAGES GITHUB
+    const charEl = document.getElementById("charEmoji");
+    if (profit >= 0) {
+        // Chemin vers ton image de victoire
+        charEl.innerHTML = `<img src="images/b_notbad.png" style="width:70px; height:70px; object-fit:contain;">`;
+    } else {
+        // Tu peux mettre une image "b_lose.png" ici ou garder l'emoji pour l'instant
+        charEl.innerHTML = "😭"; 
+    }
+    
     updateUI();
 });
 
