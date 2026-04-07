@@ -21,7 +21,10 @@ body{font-family:'DM Mono',monospace;user-select:none;-webkit-user-select:none;c
 /* BANQUE */
 .bank-wrap{text-align:center;padding:4px 0;}
 .bank-amount{font-size: 6vh; margin: -5px 0;font-weight:300;letter-spacing:-2px;line-height:1;text-shadow:0 0 30px rgba(255,160,30,0.2);}
-
+.color-neutral { color: #ffffff !important; } /* Blanc */
+.color-profit  { color: #00ff94 !important; } /* Vert néon */
+.color-loss    { color: #ff2251 !important; } /* Rouge néon */
+    
 /* CHARTE NÉON */
 .chart-box{background:rgba(0,0,0,0.4);border:1px solid rgba(255,160,30,0.15);margin-top: 0;border-radius:6px;padding:8px 0;position:relative;overflow:hidden;}
 .chart-midline{position:absolute;top:50%;left:0;right:0;height:1px;background:rgba(255,255,255,0.06);z-index:1;}
@@ -129,99 +132,139 @@ body{font-family:'DM Mono',monospace;user-select:none;-webkit-user-select:none;c
 </div>
 
 <script>
-
-const IMG_PATH = "images/"; // Le nom de ton dossier sur GitHub
-const BOSS_SURPRISE = IMG_PATH + "b_surprise.png"; // Vérifie bien l'extension (.png ou .jpg)
+// --- CONFIGURATION DES IMAGES ---
+const IMG_PATH = "images/";
+const BOSS_SURPRISE = IMG_PATH + "b_surprise.png";
 const BOSS_NOTBAD = IMG_PATH + "b_notbad.png";
-    
-// --- LOGIQUE CORE (RÉTABLIE) ---
-let bank=1000, speedPct=30, gaugeVal=0, phase="betting", round=1, history=[], lastT=null, rafId=null;
+const BOSS_LOSE = IMG_PATH + "b_lose.png";
 
-const BOSS_WIN=["Bien joué… pour une fois.","Bravo ! Tu vois quand tu veux.","Pas mal du tout."];
-const BOSS_LOSE=["Aie... C'est de l'expérience, disons.","J'aurais pas fait ça.","C'était quoi le plan ?"];
+// --- VARIABLES D'ÉTAT ---
+let bank = 1000;
+let speedPct = 30;
+let gaugeVal = 0;
+let phase = "betting";
+let history = [];
+let lastT = null;
+let rafId = null;
 
-function createOsc(){
-    const C=[{l:"CALME",d:[800,1400],dr:0,n:0.3},{l:"HAUSSE",d:[600,1000],dr:0.5,n:0.2},{l:"PIÈGE",d:[400,700],dr:2.2,n:0.15},{l:"CHUTE",d:[300,600],dr:-3.2,n:0.4}];
-    let pi=0,pt=0,pT=1000,v=0,vel=0;
-    return{
-        tick(dt,sm){
-            pt+=dt*sm; if(pt>=pT){pi=(pi+1)%C.length;pt=0;pT=C[pi].d[0]+Math.random()*500;}
-            const p=C[pi];
-            vel=vel*0.88+(-v*0.04)+(p.dr*0.012*sm)+((Math.random()*2-1)*p.n*0.5*sm);
-            v=Math.max(-1,Math.min(1,v+vel*(dt/16))); return{value:v,phase:p.l};
+const BOSS_WIN = ["Bien joué… pour une fois.", "Bravo ! Tu vois quand tu veux.", "Pas mal du tout."];
+const BOSS_LOSE_TXT = ["Aie... C'est de l'expérience, disons.", "J'aurais pas fait ça.", "C'était quoi le plan ?"];
+
+// --- MOTEUR D'OSCILLATION ---
+function createOsc() {
+    const C = [
+        { l: "CALME", d: [800, 1400], dr: 0, n: 0.3 },
+        { l: "HAUSSE", d: [600, 1000], dr: 0.5, n: 0.2 },
+        { l: "PIÈGE", d: [400, 700], dr: 2.2, n: 0.15 },
+        { l: "CHUTE", d: [300, 600], dr: -3.2, n: 0.4 }
+    ];
+    let pi = 0, pt = 0, pT = 1000, v = 0, vel = 0;
+    return {
+        tick(dt, sm) {
+            pt += dt * sm;
+            if (pt >= pT) {
+                pi = (pi + 1) % C.length;
+                pt = 0;
+                pT = C[pi].d[0] + Math.random() * 500;
+            }
+            const p = C[pi];
+            vel = vel * 0.88 + (-v * 0.04) + (p.dr * 0.012 * sm) + ((Math.random() * 2 - 1) * p.n * 0.5 * sm);
+            v = Math.max(-1, Math.min(1, v + vel * (dt / 16)));
+            return { value: v, phase: p.l };
         },
-        reset(){pi=0;pt=0;v=0;vel=0;}
+        reset() { pi = 0; pt = 0; v = 0; vel = 0; }
     };
 }
-const osc=createOsc();
+const osc = createOsc();
 
-function updateUI(){
-    document.getElementById("bankAmt").textContent=`$${Math.floor(bank).toLocaleString()}`;
-    document.getElementById("roundInfo").textContent=`ROUND ${round}`;
+// --- MISE À JOUR DE L'INTERFACE ---
+function updateUI() {
+    const bankEl = document.getElementById("bankAmt");
+    const currentBank = Math.floor(bank);
+    
+    bankEl.textContent = `$${currentBank.toLocaleString()}`;
+
+    // Logique de couleur demandée
+    if (currentBank < 0) {
+        bankEl.style.color = "#ff2251"; // Rouge
+    } else if (currentBank > 1000) {
+        bankEl.style.color = "#00ff94"; // Vert
+    } else {
+        bankEl.style.color = "#ffffff"; // Blanc
+    }
 }
 
-const btn=document.getElementById("holdBtn");
-
-btn.addEventListener("pointerdown",(e)=>{
-    if(phase!=="betting") return;
-    phase="holding";
-    osc.reset(); history=[]; lastT=performance.now();
-    btn.style.background="radial-gradient(circle,#00ff94,#006635)";
-    btn.style.boxShadow="0 8px 0 #004d28";
-    document.getElementById("charEmoji").innerHTML = `<img src="images/b_surprise.png" style="width:100px; height:100px; object-fit:contain;">`;
-    
-
-    function loop(t){
-        let dt=t-lastT; lastT=t;
-        const res=osc.tick(dt, 0.3+(speedPct-10)/90*2.7);
-        gaugeVal=res.value;
-        history.push(gaugeVal); if(history.length>80) history.shift();
-        
-        // Dessin charte
-        const color=gaugeVal>0.5?"#00ff94":gaugeVal>0?"#aaff44":gaugeVal>-0.35?"#ffee00":"#ff2251";
-        const pts=history.map((v,i)=>`${(i/(history.length-1))*300},${27-v*24}`).join(" L ");
-        document.getElementById("chartLine").setAttribute("d","M "+pts);
-        document.getElementById("chartLine").setAttribute("stroke",color);
-        document.getElementById("chartArea").setAttribute("d","M "+pts+" L 300,27 L 0,27 Z");
-        document.getElementById("cgT").setAttribute("stop-color",color);
-        document.getElementById("phaseLbl").textContent=res.phase;
-        document.getElementById("phaseLbl").style.color=color;
-
-        const slider = document.getElementById("speedSlider");
+// --- LOGIQUE DU SLIDER (SORTIE DE LA BOUCLE) ---
+const slider = document.getElementById("speedSlider");
 const display = document.getElementById("speedDisplay");
 
 function updateSliderPos() {
     const val = slider.value;
-    const min = slider.min ? slider.min : 0;
-    const max = slider.max ? slider.max : 100;
+    const min = parseInt(slider.min) || 10;
+    const max = parseInt(slider.max) || 100;
+    const percent = ((val - min) * 100) / (max - min);
     
-    // Calcul du pourcentage réel de progression (0 à 1)
-    const newVal = Number(((val - min) * 100) / (max - min));
-    
+    speedPct = val;
     display.textContent = val + "%";
-
-    // On déplace le texte. 
-    // Le "calc" permet de compenser la largeur du curseur lui-même (environ 15-20px)
-    display.style.left = `calc(${newVal}% + (${8 - newVal * 0.15}px))`;
+    // Calcul de position pour que le % suive le curseur
+    display.style.left = `calc(${percent}% + (${8 - percent * 0.15}px))`;
 }
 
-// Initialisation au chargement et sur chaque mouvement
 slider.addEventListener("input", updateSliderPos);
-updateSliderPos();
 
-        // Gauge
-        const profit=Math.floor(gaugeVal*(bank*(speedPct/100)));
-        const gv=document.getElementById("gaugeVal");
-        gv.textContent=(profit>=0?"+$":"-$")+Math.abs(profit);
-        gv.style.color=color;
-        const gf=document.getElementById("gFill");
-        gf.style.width=Math.abs(gaugeVal*50)+"%";
-        gf.style.left=gaugeVal>=0?"50%":(50-Math.abs(gaugeVal*50))+"%";
-        gf.style.background=color;
+// --- GESTION DU JEU ---
+const btn = document.getElementById("holdBtn");
 
-        if(phase==="holding") rafId=requestAnimationFrame(loop);
+btn.addEventListener("pointerdown", (e) => {
+    if (phase !== "betting") return;
+    phase = "holding";
+    osc.reset();
+    history = [];
+    lastT = performance.now();
+    
+    // UI Bouton
+    btn.style.background = "radial-gradient(circle,#00ff94,#006635)";
+    btn.style.boxShadow = "0 8px 0 #004d28";
+    
+    // Image Boss Surprise
+    document.getElementById("charEmoji").innerHTML = `<img src="${BOSS_SURPRISE}" style="width:110px; height:110px; object-fit:contain; display:block;">`;
+
+    function loop(t) {
+        if (phase !== "holding") return;
+        let dt = t - lastT;
+        lastT = t;
+        
+        const res = osc.tick(dt, 0.3 + (speedPct - 10) / 90 * 2.7);
+        gaugeVal = res.value;
+        
+        history.push(gaugeVal);
+        if (history.length > 80) history.shift();
+        
+        // Mise à jour graphique SVG
+        const color = gaugeVal > 0.5 ? "#00ff94" : gaugeVal > 0 ? "#aaff44" : gaugeVal > -0.35 ? "#ffee00" : "#ff2251";
+        const pts = history.map((v, i) => `${(i / (history.length - 1)) * 300},${27 - v * 24}`).join(" L ");
+        document.getElementById("chartLine").setAttribute("d", "M " + pts);
+        document.getElementById("chartLine").setAttribute("stroke", color);
+        document.getElementById("chartArea").setAttribute("d", "M " + pts + " L 300,27 L 0,27 Z");
+        document.getElementById("cgT").setAttribute("stop-color", color);
+        document.getElementById("phaseLbl").textContent = res.phase;
+        document.getElementById("phaseLbl").style.color = color;
+
+        // Calcul Profit temps réel
+        const profit = Math.floor(gaugeVal * (bank * (speedPct / 100)));
+        const gv = document.getElementById("gaugeVal");
+        gv.textContent = (profit >= 0 ? "+$" : "-$") + Math.abs(profit);
+        gv.style.color = color;
+        
+        // Remplissage Jauge
+        const gf = document.getElementById("gFill");
+        gf.style.width = Math.abs(gaugeVal * 50) + "%";
+        gf.style.left = gaugeVal >= 0 ? "50%" : (50 - Math.abs(gaugeVal * 50)) + "%";
+        gf.style.background = color;
+
+        rafId = requestAnimationFrame(loop);
     }
-    rafId=requestAnimationFrame(loop);
+    rafId = requestAnimationFrame(loop);
 });
 
 btn.addEventListener("pointerup", () => {
@@ -235,41 +278,30 @@ btn.addEventListener("pointerup", () => {
     document.getElementById("btnWrap").style.display = "none";
     document.getElementById("resultBox").style.display = "block";
     
-    // Gestion du texte du boss
-    document.getElementById("bossText").textContent = profit >= 0 ? BOSS_WIN[Math.floor(Math.random() * 3)] : BOSS_LOSE[Math.floor(Math.random() * 3)];
-    
-    // REMPLACEMENT DE L'EMOJI PAR TES IMAGES GITHUB
+    // Feedback Boss
     const charEl = document.getElementById("charEmoji");
     if (profit >= 0) {
-        // Chemin vers ton image de victoire
-        charEl.innerHTML = `<img src="images/b_notbad.png" style="width:100px; height:100px; object-fit:contain;">`;
+        document.getElementById("bossText").textContent = BOSS_WIN[Math.floor(Math.random() * BOSS_WIN.length)];
+        charEl.innerHTML = `<img src="${BOSS_NOTBAD}" style="width:110px; height:110px; object-fit:contain; display:block;">`;
     } else {
-        // Tu peux mettre une image "b_lose.png" ici ou garder l'emoji pour l'instant
-        charEl.innerHTML = `<img src="images/b_lose.png" style="width:100px; height:100px; object-fit:contain;">`;
+        document.getElementById("bossText").textContent = BOSS_LOSE_TXT[Math.floor(Math.random() * BOSS_LOSE_TXT.length)];
+        charEl.innerHTML = `<img src="${BOSS_LOSE}" style="width:110px; height:110px; object-fit:contain; display:block;">`;
     }
     
     updateUI();
 });
 
-function nextRound(){
-    phase="betting"; round++;
-    document.getElementById("btnWrap").style.display="flex";
-    document.getElementById("resultBox").style.display="none";
-    btn.style.background="radial-gradient(circle at 35% 30%,#ff2251 0%,#aa1535 60%,#660d20 100%)";
-    btn.style.boxShadow="0 8px 0 #4d0a18";
-     // Il faudrat changer cette image neutre deception 
-    document.getElementById("charEmoji").innerHTML = `<img src="images/b_surprise.png" style="width:100px; height:100px; object-fit:contain;">`;
-
+function nextRound() {
+    phase = "betting";
+    document.getElementById("btnWrap").style.display = "flex";
+    document.getElementById("resultBox").style.display = "none";
     
-    updateUI();
-}
-
-document.getElementById("speedSlider").addEventListener("input", function() {
-    speedPct = this.value;
-    // Cette ligne met à jour l'affichage du pourcentage
-    document.getElementById("speedDisplay").textContent = this.value + "%";
-});
-updateUI();
+    // Reset Bouton
+    btn.style.background = "radial-gradient(circle at 35% 30%,#ff2251 0%,#aa1535 60%,#660d20 100%)";
+    btn.style.boxShadow = "0 8px 0 #4d0a18";
+    
+    // Retour Image de base
+    document.getElementById("charEmoji").innerHTML = `<img src="${BOSS_NOTBAD}" style="width:110px; height:
 </script>
 </body>
 </html>
