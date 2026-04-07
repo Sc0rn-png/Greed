@@ -54,6 +54,58 @@ body{font-family:'DM Mono',monospace;user-select:none;-webkit-user-select:none;c
 .gauge-track{position:relative;height:16px;background:rgba(0,0,0,0.5);border-radius:8px;overflow:hidden;border:1px solid rgba(255,160,30,0.15);}
 .gauge-fill{position:absolute;top:0;bottom:0;border-radius:8px;left:50%;width:0%;}
 
+/* Conteneur principal de la boîte de vitesse */
+.speed-box {
+    background: #000;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #1a1a1a;
+}
+
+/* Organisation du haut : Gauche vs Droite */
+.speed-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 15px;
+}
+
+/* Effet Néon sur les textes actifs */
+.speed-label, .speed-val {
+    color: #00f7c2; /* Cyan néon */
+    text-shadow: 0 0 10px rgba(0, 247, 194, 0.6);
+    font-weight: bold;
+}
+
+/* Personnalisation du Slider (Barre) */
+#speedSlider {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 4px;
+    background: #222;
+    border-radius: 2px;
+}
+
+/* Personnalisation du bouton du Slider (Cercle lumineux) */
+#speedSlider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    height: 16px;
+    width: 16px;
+    border-radius: 50%;
+    background: #00f7c2;
+    box-shadow: 0 0 15px #00f7c2; /* C'est ça qui fait l'effet de l'autre image */
+    cursor: pointer;
+}
+
+/* Organisation du bas (LENT / NORMAL / YOLO) */
+.speed-footer {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    color: #444;
+    margin-top: 10px;
+}
+    
 /* BOUTON */
 .btn-wrap{display:flex;justify-content:center;padding:20px 0;}
 #holdBtn{width:130px;height:130px;border-radius:50%;border:none;cursor:pointer;outline:none;background:radial-gradient(circle at 35% 30%,#ff2251 0%,#aa1535 60%,#660d20 100%);box-shadow:0 8px 0 #4d0a18;color:#fff;font-weight:bold;animation:btnPulse 2s infinite;}
@@ -108,21 +160,26 @@ body{font-family:'DM Mono',monospace;user-select:none;-webkit-user-select:none;c
         </div>
     </div>
 
-<!-- Speed -->
-  <div class="speed-box" id="speedBox">
+<div class="speed-box">
     <div class="speed-header">
-      <div>
-        <span class="speed-tag">VITESSE</span>
-        <span class="speed-label" id="speedLbl">SÉCURISÉ</span>
-      </div> 
-      <div style="text-align:right;">
-        <span class="speed-val" id="speedVal">30%</span>
-        <span class="speed-bet" id="speedBet">mise ~$240</span>
-      </div>
+        <div>
+            <div style="font-size: 8px; color: #666;">VITESSE</div>
+            <div class="speed-label" id="speedLbl">SÉCURISÉ</div>
+        </div>
+        <div style="text-align: right;">
+            <span class="speed-val" id="speedVal">30%</span>
+            <div style="font-size: 10px; color: #666;">mise ~$240</div>
+        </div>
     </div>
-    <input type="range" id="speedSlider" min="10" max="100" step="5" value="30"/>
-    <div class="speed-footer"><span>LENT</span><span>NORMAL</span><span>YOLO 🔥</span></div>
-  </div>
+    
+    <input type="range" id="speedSlider" min="10" max="100" value="30">
+    
+    <div class="speed-footer">
+        <span>LENT</span>
+        <span>NORMAL</span>
+        <span>YOLO 🔥</span>
+    </div>
+</div>
 
     <div class="btn-wrap" id="btnWrap">
         <button id="holdBtn">JOUER</button>
@@ -195,21 +252,36 @@ function updateUI() {
 }
 
 // --- LOGIQUE DU SLIDER ---
-const slider = document.getElementById("speedSlider");
-const display = document.getElementById("speedDisplay");
-
 function updateSliderPos() {
-    const val = slider.value;
-    const min = parseInt(slider.min) || 10;
-    const max = parseInt(slider.max) || 100;
-    const percent = ((val - min) * 100) / (max - min);
+    const slider = document.getElementById("speedSlider");
+    const val = parseInt(slider.value);
     
-    speedPct = val;
-    display.textContent = val + "%";
-    display.style.left = `calc(${percent}% + (${8 - percent * 0.15}px))`;
-}
+    // 1. Mise à jour des chiffres
+    document.getElementById("speedVal").textContent = val + "%";
+    speedPct = val; // Mise à jour de la variable globale pour le jeu
 
-slider.addEventListener("input", updateSliderPos);
+    // 2. Calcul de la mise théorique (exemple: 25% de la banque à 30% de vitesse)
+    const theoreticalBet = Math.floor(bank * (val / 100) * 0.8);
+    document.getElementById("speedBet").textContent = `mise ~$${theoreticalBet}`;
+
+    // 3. Changement du label de sécurité et des couleurs du footer
+    const lbl = document.getElementById("speedLbl");
+    const footerSpans = document.querySelectorAll(".speed-footer span");
+    
+    // Reset footer
+    footerSpans.forEach(s => s.className = "");
+
+    if (val < 40) {
+        lbl.textContent = "SÉCURISÉ";
+        footerSpans[0].className = "footer-active";
+    } else if (val < 80) {
+        lbl.textContent = "AGRESSIF";
+        footerSpans[1].className = "footer-active";
+    } else {
+        lbl.textContent = "YOLO 🔥";
+        footerSpans[2].className = "footer-active";
+    }
+}
 
 // --- GESTION DU JEU ---
 const btn = document.getElementById("holdBtn");
