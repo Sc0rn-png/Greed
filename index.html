@@ -82,22 +82,28 @@ body{font-family:'DM Mono',monospace;user-select:none;-webkit-user-select:none;c
     -webkit-appearance: none;
     width: 100%;
     height: 4px;
-    background: #222;
+    background: #222; /* Sera écrasé par le JS pour l'effet de remplissage */
     border-radius: 2px;
+    outline: none;
 }
 
-/* Personnalisation du bouton du Slider (Cercle lumineux) */
+/* IMPORTANT : Permet de voir le remplissage cyan sur Chrome/Safari */
+#speedSlider::-webkit-slider-runnable-track {
+    background: transparent;
+}
+
 #speedSlider::-webkit-slider-thumb {
     -webkit-appearance: none;
     height: 16px;
     width: 16px;
     border-radius: 50%;
     background: #00f7c2;
-    box-shadow: 0 0 15px #00f7c2; /* C'est ça qui fait l'effet de l'autre image */
+    box-shadow: 0 0 15px #00f7c2;
     cursor: pointer;
+    margin-top: -6px; /* Centre le bouton sur la barre */
 }
 
-/* Organisation du bas (LENT / NORMAL / YOLO) */
+/* Organisation du bas (LENT / NORMAL / RISQUE) */
 .speed-footer {
     display: flex;
     justify-content: space-between;
@@ -168,16 +174,16 @@ body{font-family:'DM Mono',monospace;user-select:none;-webkit-user-select:none;c
         </div>
         <div style="text-align: right;">
             <span class="speed-val" id="speedVal">30%</span>
-            <div style="font-size: 10px; color: #666;">mise ~$240</div>
+            <div id="speedBet" style="font-size: 10px; color: #666;">mise ~$240</div>
         </div>
     </div>
     
-    <input type="range" id="speedSlider" min="10" max="100" value="30">
+    <input type="range" id="speedSlider" min="10" max="100" value="30" oninput="updateSliderPos()">
     
     <div class="speed-footer">
         <span>LENT</span>
         <span>NORMAL</span>
-        <span>YOLO 🔥</span>
+        <span>RISQUÉ🔥</span>
     </div>
 </div>
 
@@ -251,35 +257,39 @@ function updateUI() {
     }
 }
 
-// --- LOGIQUE DU SLIDER ---
 function updateSliderPos() {
     const slider = document.getElementById("speedSlider");
     const val = parseInt(slider.value);
+    const min = parseInt(slider.min) || 10;
+    const max = parseInt(slider.max) || 100;
     
-    // 1. Mise à jour des chiffres
-    document.getElementById("speedVal").textContent = val + "%";
-    speedPct = val; // Mise à jour de la variable globale pour le jeu
+    // Calcul du pourcentage réel (0 à 100) pour le remplissage
+    const percent = ((val - min) * 100) / (max - min);
+    
+    // 1. Mise à jour de la variable globale de jeu
+    speedPct = val;
 
-    // 2. Calcul de la mise théorique (exemple: 25% de la banque à 30% de vitesse)
-    const theoreticalBet = Math.floor(bank * (val / 100) * 0.8);
-    document.getElementById("speedBet").textContent = `mise ~$${theoreticalBet}`;
+    // 2. Mise à jour du texte (ex: 30%)
+    const speedValEl = document.getElementById("speedVal");
+    if (speedValEl) speedValEl.textContent = val + "%";
 
-    // 3. Changement du label de sécurité et des couleurs du footer
+    // 3. REMPLISSAGE DE LA JAUGE (Le trait cyan qui suit le point)
+    // On utilise un dégradé linéaire dynamique sur le slider lui-même
+    slider.style.background = `linear-gradient(to right, #00f7c2 0%, #00f7c2 ${percent}%, #222 ${percent}%, #222 100%)`;
+
+    // 4. Calcul de la mise théorique affichée
+    const speedBetEl = document.getElementById("speedBet");
+    if (speedBetEl) {
+        const theoreticalBet = Math.floor(bank * (val / 100) * 0.8);
+        speedBetEl.textContent = `mise ~$${theoreticalBet}`;
+    }
+
+    // 5. Mise à jour du label de sécurité (SÉCURISÉ / RISQUE MAX)
     const lbl = document.getElementById("speedLbl");
-    const footerSpans = document.querySelectorAll(".speed-footer span");
-    
-    // Reset footer
-    footerSpans.forEach(s => s.className = "");
-
-    if (val < 40) {
-        lbl.textContent = "SÉCURISÉ";
-        footerSpans[0].className = "footer-active";
-    } else if (val < 80) {
-        lbl.textContent = "AGRESSIF";
-        footerSpans[1].className = "footer-active";
-    } else {
-        lbl.textContent = "YOLO 🔥";
-        footerSpans[2].className = "footer-active";
+    if (lbl) {
+        if (val < 40) lbl.textContent = "SÉCURISÉ";
+        else if (val < 80) lbl.textContent = "AGRESSIF";
+        else lbl.textContent = "RISQUE MAX🔥";
     }
 }
 
