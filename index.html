@@ -181,20 +181,18 @@ const osc = createOsc();
 function updateUI() {
     const bankEl = document.getElementById("bankAmt");
     const currentBank = Math.floor(bank);
-    
     bankEl.textContent = `$${currentBank.toLocaleString()}`;
 
-    // Logique de couleur demandée
     if (currentBank < 0) {
-        bankEl.style.color = "#ff2251"; // Rouge
+        bankEl.style.color = "#ff2251"; 
     } else if (currentBank > 1000) {
-        bankEl.style.color = "#00ff94"; // Vert
+        bankEl.style.color = "#00ff94"; 
     } else {
-        bankEl.style.color = "#ffffff"; // Blanc
+        bankEl.style.color = "#ffffff"; 
     }
 }
 
-// --- LOGIQUE DU SLIDER (SORTIE DE LA BOUCLE) ---
+// --- LOGIQUE DU SLIDER ---
 const slider = document.getElementById("speedSlider");
 const display = document.getElementById("speedDisplay");
 
@@ -206,7 +204,6 @@ function updateSliderPos() {
     
     speedPct = val;
     display.textContent = val + "%";
-    // Calcul de position pour que le % suive le curseur
     display.style.left = `calc(${percent}% + (${8 - percent * 0.15}px))`;
 }
 
@@ -222,11 +219,9 @@ btn.addEventListener("pointerdown", (e) => {
     history = [];
     lastT = performance.now();
     
-    // UI Bouton
     btn.style.background = "radial-gradient(circle,#00ff94,#006635)";
     btn.style.boxShadow = "0 8px 0 #004d28";
     
-    // Image Boss Surprise
     document.getElementById("charEmoji").innerHTML = `<img src="${BOSS_SURPRISE}" style="width:110px; height:110px; object-fit:contain; display:block;">`;
 
     function loop(t) {
@@ -236,11 +231,9 @@ btn.addEventListener("pointerdown", (e) => {
         
         const res = osc.tick(dt, 0.3 + (speedPct - 10) / 90 * 2.7);
         gaugeVal = res.value;
-        
         history.push(gaugeVal);
         if (history.length > 80) history.shift();
         
-        // Mise à jour graphique SVG
         const color = gaugeVal > 0.5 ? "#00ff94" : gaugeVal > 0 ? "#aaff44" : gaugeVal > -0.35 ? "#ffee00" : "#ff2251";
         const pts = history.map((v, i) => `${(i / (history.length - 1)) * 300},${27 - v * 24}`).join(" L ");
         document.getElementById("chartLine").setAttribute("d", "M " + pts);
@@ -250,13 +243,11 @@ btn.addEventListener("pointerdown", (e) => {
         document.getElementById("phaseLbl").textContent = res.phase;
         document.getElementById("phaseLbl").style.color = color;
 
-        // Calcul Profit temps réel
         const profit = Math.floor(gaugeVal * (bank * (speedPct / 100)));
         const gv = document.getElementById("gaugeVal");
         gv.textContent = (profit >= 0 ? "+$" : "-$") + Math.abs(profit);
         gv.style.color = color;
         
-        // Remplissage Jauge
         const gf = document.getElementById("gFill");
         gf.style.width = Math.abs(gaugeVal * 50) + "%";
         gf.style.left = gaugeVal >= 0 ? "50%" : (50 - Math.abs(gaugeVal * 50)) + "%";
@@ -278,7 +269,6 @@ btn.addEventListener("pointerup", () => {
     document.getElementById("btnWrap").style.display = "none";
     document.getElementById("resultBox").style.display = "block";
     
-    // Feedback Boss
     const charEl = document.getElementById("charEmoji");
     if (profit >= 0) {
         document.getElementById("bossText").textContent = BOSS_WIN[Math.floor(Math.random() * BOSS_WIN.length)];
@@ -287,7 +277,6 @@ btn.addEventListener("pointerup", () => {
         document.getElementById("bossText").textContent = BOSS_LOSE_TXT[Math.floor(Math.random() * BOSS_LOSE_TXT.length)];
         charEl.innerHTML = `<img src="${BOSS_LOSE}" style="width:110px; height:110px; object-fit:contain; display:block;">`;
     }
-    
     updateUI();
 });
 
@@ -295,13 +284,16 @@ function nextRound() {
     phase = "betting";
     document.getElementById("btnWrap").style.display = "flex";
     document.getElementById("resultBox").style.display = "none";
-    
-    // Reset Bouton
     btn.style.background = "radial-gradient(circle at 35% 30%,#ff2251 0%,#aa1535 60%,#660d20 100%)";
     btn.style.boxShadow = "0 8px 0 #4d0a18";
-    
-    // Retour Image de base
-    document.getElementById("charEmoji").innerHTML = `<img src="${BOSS_NOTBAD}" style="width:110px; height:
+    document.getElementById("charEmoji").innerHTML = `<img src="${BOSS_NOTBAD}" style="width:110px; height:110px; object-fit:contain; display:block;">`;
+    document.getElementById("bossText").textContent = "Prouve-moi que c'était pas un accident.";
+    updateUI();
+}
+
+// Initialisation
+updateSliderPos();
+updateUI();
 </script>
 </body>
 </html>
