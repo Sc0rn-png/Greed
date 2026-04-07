@@ -151,9 +151,7 @@ btn.addEventListener("pointerdown",(e)=>{
     osc.reset(); history=[]; lastT=performance.now();
     btn.style.background="radial-gradient(circle,#00ff94,#006635)";
     btn.style.boxShadow="0 8px 0 #004d28";
-    document.getElementById("charEmoji").textContent="😰";
-    // Dans btn.addEventListener("pointerdown", ...)
-document.getElementById("charEmoji").innerHTML = `<img src="images/b_surprise.png" style="width:70px; height:70px; object-fit:contain;">`;
+    document.getElementById("charEmoji").innerHTML = `<img src="images/b_surprise.png" style="width:100px; height:100px; object-fit:contain;">`;
     
 
     function loop(t){
@@ -227,10 +225,10 @@ btn.addEventListener("pointerup", () => {
     const charEl = document.getElementById("charEmoji");
     if (profit >= 0) {
         // Chemin vers ton image de victoire
-        charEl.innerHTML = `<img src="images/b_notbad.png" style="width:150px; height:150px; object-fit:contain;">`;
+        charEl.innerHTML = `<img src="images/b_notbad.png" style="width:100px; height:100px; object-fit:contain;">`;
     } else {
         // Tu peux mettre une image "b_lose.png" ici ou garder l'emoji pour l'instant
-        charEl.innerHTML = `<img src="images/b_lose.png" style="width:150px; height:150px; object-fit:contain;">`;
+        charEl.innerHTML = `<img src="images/b_lose.png" style="width:100px; height:100px; object-fit:contain;">`;
     }
     
     updateUI();
@@ -242,7 +240,10 @@ function nextRound(){
     document.getElementById("resultBox").style.display="none";
     btn.style.background="radial-gradient(circle at 35% 30%,#ff2251 0%,#aa1535 60%,#660d20 100%)";
     btn.style.boxShadow="0 8px 0 #4d0a18";
-    document.getElementById("charEmoji").textContent="😐";
+     // Il faudrat changer cette image neutre deception 
+    document.getElementById("charEmoji").innerHTML = `<img src="images/b_surprise.png" style="width:100px; height:100px; object-fit:contain;">`;
+
+    
     updateUI();
 }
 
