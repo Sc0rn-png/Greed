@@ -83,9 +83,11 @@ body{font-family:'DM Mono',monospace;user-select:none;-webkit-user-select:none;c
 
 #speedSlider {
     -webkit-appearance: none;
-    height: 4px; /* Barre fine */
+    display: block;
+    width: 100% !important; /* Force la jauge à s'étaler */
+    height: 4px;
+    margin: 20px 0;
     background: #222;
-    outline: none;
 }
 
 #speedSlider::-webkit-slider-thumb {
@@ -297,7 +299,7 @@ function updateSliderPos() {
     } else {
         color = "#ff2251"; // Rouge
         glow = "rgba(255, 34, 81, 0.6)";
-        label = "RISQUE MAX 🔥";
+        label = "RISQUE MAX";
     }
 
     // 3. Application des couleurs aux variables CSS
