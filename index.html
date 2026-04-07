@@ -227,10 +227,10 @@ btn.addEventListener("pointerup", () => {
     const charEl = document.getElementById("charEmoji");
     if (profit >= 0) {
         // Chemin vers ton image de victoire
-        charEl.innerHTML = `<img src="images/b_notbad.png" style="width:70px; height:70px; object-fit:contain;">`;
+        charEl.innerHTML = `<img src="images/b_notbad.png" style="width:150px; height:150px; object-fit:contain;">`;
     } else {
         // Tu peux mettre une image "b_lose.png" ici ou garder l'emoji pour l'instant
-        charEl.innerHTML = "😭"; 
+        charEl.innerHTML = `<img src="images/b_lose.png" style="width:150px; height:150px; object-fit:contain;">`;
     }
     
     updateUI();
