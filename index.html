@@ -83,20 +83,20 @@ body{font-family:'DM Mono',monospace;user-select:none;-webkit-user-select:none;c
 
 #speedSlider {
     -webkit-appearance: none;
-    width: 100%;
-    height: 4px;
-    border-radius: 2px;
-    outline: none;
+    height: 4px; /* Barre fine */
     background: #222;
-    cursor: pointer;
+    outline: none;
 }
 
-/* Recentrage vertical du bouton */
-#speedSlider::-webkit-slider-runnable-track {
-    background: transparent;
-    height: 4px; /* Même hauteur que le slider */
-    display: flex;
-    align-items: center;
+#speedSlider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    height: 18px;
+    width: 18px;
+    border-radius: 50%;
+    background: var(--speed-color);
+    box-shadow: 0 0 15px var(--speed-color);
+    margin-top: -7px; /* C'est cette ligne qui fait le "remontage" */
+    cursor: pointer;
 }
 
 #speedSlider::-webkit-slider-thumb {
