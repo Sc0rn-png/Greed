@@ -94,7 +94,7 @@ body{font-family:'DM Mono',monospace;user-select:none;-webkit-user-select:none;c
         
         <span id="speedDisplay" style="
             position: absolute; 
-            top: -22px; 
+            top: -22px;
             transform: translateX(-50%); 
             font-size: 12px; 
             font-weight: bold; 
@@ -168,6 +168,28 @@ btn.addEventListener("pointerdown",(e)=>{
         document.getElementById("cgT").setAttribute("stop-color",color);
         document.getElementById("phaseLbl").textContent=res.phase;
         document.getElementById("phaseLbl").style.color=color;
+
+        const slider = document.getElementById("speedSlider");
+const display = document.getElementById("speedDisplay");
+
+function updateSliderPos() {
+    const val = slider.value;
+    const min = slider.min ? slider.min : 0;
+    const max = slider.max ? slider.max : 100;
+    
+    // Calcul du pourcentage réel de progression (0 à 1)
+    const newVal = Number(((val - min) * 100) / (max - min));
+    
+    display.textContent = val + "%";
+
+    // On déplace le texte. 
+    // Le "calc" permet de compenser la largeur du curseur lui-même (environ 15-20px)
+    display.style.left = `calc(${newVal}% + (${8 - newVal * 0.15}px))`;
+}
+
+// Initialisation au chargement et sur chaque mouvement
+slider.addEventListener("input", updateSliderPos);
+updateSliderPos();
 
         // Gauge
         const profit=Math.floor(gaugeVal*(bank*(speedPct/100)));
