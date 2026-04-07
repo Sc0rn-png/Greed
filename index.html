@@ -152,6 +152,9 @@ btn.addEventListener("pointerdown",(e)=>{
     btn.style.background="radial-gradient(circle,#00ff94,#006635)";
     btn.style.boxShadow="0 8px 0 #004d28";
     document.getElementById("charEmoji").textContent="😰";
+    // Dans btn.addEventListener("pointerdown", ...)
+document.getElementById("charEmoji").innerHTML = `<img src="images/b_surprise.png" style="width:70px; height:70px; object-fit:contain;">`;
+    
 
     function loop(t){
         let dt=t-lastT; lastT=t;
