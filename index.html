@@ -145,22 +145,21 @@ body{font-family:'DM Mono',monospace;user-select:none;-webkit-user-select:none;c
 <body>
 
 <div class="page">
- <div class="topbar" style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 10px; margin-bottom: 10px; border-bottom: 1px solid rgba(255, 160, 30, 0.2);">
-    
-    <button onclick="showApartmentScreen()" style="background: none; border: none; cursor: pointer; display: flex; align-items: center; gap: 8px; padding: 0;">
-        <span style="font-size: 18px; filter: drop-shadow(0 0 5px rgba(255,160,30,0.4));">🏠</span>
-        <div class="logo" style="margin: 0; font-size: 9px; letter-spacing: 2px;">APPARTEMENT</div>
-    </button>
+    <div class="topbar" style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 10px; margin-bottom: 10px; border-bottom: 1px solid rgba(255, 160, 30, 0.2);">
+        <button onclick="showApartmentScreen()" style="background: none; border: none; cursor: pointer; display: flex; align-items: center; gap: 8px; padding: 0;">
+            <span style="font-size: 18px; filter: drop-shadow(0 0 5px rgba(255,160,30,0.4));">🏠</span>
+            <div class="logo" style="margin: 0; font-size: 9px; letter-spacing: 2px;">APPARTEMENT</div>
+        </button>
 
-    <div id="bankAmt" style="color: #ff9f1e; font-weight: bold; font-size: 14px; letter-spacing: 1px;">$1 000</div>
-  <div class="char-row">
-    <div class="char-emoji" id="charEmoji">
-        <img src="images/b_notbad.png">
+        <div id="bankAmt" style="color: #ff9f1e; font-weight: bold; font-size: 14px; letter-spacing: 1px;">$1 000</div>
+    </div> <div class="char-row">
+        <div class="char-emoji" id="charEmoji">
+            <img src="images/b_notbad.png" style="width:110px; height:auto;">
+        </div>
+        <div class="boss-bubble">
+            <span id="bossText">Tu te penses prêt pour ton premier jour ?</span>
+        </div>
     </div>
-    <div class="boss-bubble">
-        <span id="bossText">Tu te penses prêt pour ton premier jour ?</span>
-    </div>
-</div>
 
     <div class="chart-box">
         <div class="chart-midline"></div>
@@ -187,31 +186,31 @@ body{font-family:'DM Mono',monospace;user-select:none;-webkit-user-select:none;c
         </div>
     </div>
 
-<div class="speed-box">
-    <div class="speed-header">
-        <div>
-            <div style="font-size: 8px; color: #666;">VITESSE</div>
-            <div class="speed-label" id="speedLbl">SÉCURISÉ</div>
+    <div class="speed-box">
+        <div class="speed-header">
+            <div>
+                <div style="font-size: 8px; color: #666;">VITESSE</div>
+                <div class="speed-label" id="speedLbl">SÉCURISÉ</div>
+            </div>
+            <div style="text-align: right;">
+                <span class="speed-val" id="speedVal">30%</span>
+            </div>
         </div>
-        <div style="text-align: right;">
-            <span class="speed-val" id="speedVal">30%</span>
+        
+        <input type="range" id="speedSlider" min="10" max="100" value="30" oninput="updateSliderPos()">
+        
+        <div class="speed-footer">
+            <span>LENT</span>
+            <span>NORMAL</span>
+            <span>RISQUÉ🔥</span>
         </div>
     </div>
-    
-    <input type="range" id="speedSlider" min="10" max="100" value="30" oninput="updateSliderPos()">
-    
-    <div class="speed-footer">
-        <span>LENT</span>
-        <span>NORMAL</span>
-        <span>RISQUÉ🔥</span>
-    </div>
-</div>
 
     <div class="btn-wrap" id="btnWrap">
         <button id="holdBtn">JOUER</button>
     </div>
     
-    <div id="resultBox">
+    <div id="resultBox" style="display:none;">
         <button class="arcade-btn" onclick="nextRound()">▶ REJOUER </button>
     </div>
 </div>
