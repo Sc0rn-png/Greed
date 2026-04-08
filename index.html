@@ -143,6 +143,18 @@ body{font-family:'DM Mono',monospace;user-select:none;-webkit-user-select:none;c
 </style>
 </head>
 <body>
+    <div id="navigationBar" style="position: fixed; top: 0; left: 0; right: 0; display: flex; justify-content: flex-start; padding: 15px; background: rgba(0, 0, 0, 0.4); border-bottom: 1px solid rgba(255, 160, 30, 0.15); z-index: 1000;">
+    <button onclick="showApartmentScreen()" style="background: none; border: none; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+        <span style="font-size: 20px; color: #ff9f1e; text-shadow: 0 0 10px rgba(255, 160, 30, 0.6);">🏠</span>
+        <span style="font-family: 'DM Mono', monospace; font-size: 11px; color: rgba(255, 255, 255, 0.6); letter-spacing: 2px;">APPARTEMENT</span>
+    </button>
+</div>
+
+<div id="apartmentScreen" style="display: none; width: 100%; height: 100vh; position: fixed; top: 0; left: 0; background-color: #0d0a06; z-index: 999; overflow: hidden;">
+    <button onclick="showGameScreen()" style="position: absolute; top: 70px; left: 20px; padding: 10px; background: none; border: 1px solid rgba(255, 255, 255, 0.1); color: rgba(255, 255, 255, 0.4); border-radius: 4px; font-family: 'DM Mono', monospace; font-size: 8px; cursor: pointer; z-index: 1001;">↩ Retour Jeu</button>
+    
+    <img src="path/to/votre_image_appartement_isometrique.png" alt="Votre Appartement" style="width: 100%; height: 100%; object-fit: contain; position: absolute; top: 0; left: 0;">
+</div>
 
 <div class="page">
     <div class="topbar"><div class="logo">◈ GREED ◈</div><div id="bankAmt" style="color: #ff9f1e; font-weight: bold; font-size: 14px;">$1 000</div>
@@ -399,6 +411,35 @@ function nextRound() {
 // Initialisation
 updateSliderPos();
 updateUI();
+    // === LOGIQUE DE NAVIGATION DES ÉCRANS ===
+
+function showApartmentScreen() {
+    // 1. Masque l'écran de jeu actuel (le conteneur "page" principal)
+    const gameScreen = document.querySelector('.page'); // Utilise la classe '.page' si c'est ton conteneur de jeu
+    if (gameScreen) gameScreen.style.display = 'none';
+
+    // 2. Affiche l'écran de l'appartement
+    const apartmentEl = document.getElementById('apartmentScreen');
+    if (apartmentEl) apartmentEl.style.display = 'block';
+
+    // 3. (Optionnel) Ajoute un feedback au boss
+    const bossTxt = document.getElementById('bossText');
+    if (bossTxt) bossTxt.textContent = "Visiter ton bien ? Bonne idée, c'est là que l'on voit si ton argent est bien investi...";
+}
+
+function showGameScreen() {
+    // 1. Masque l'écran de l'appartement
+    const apartmentEl = document.getElementById('apartmentScreen');
+    if (apartmentEl) apartmentEl.style.display = 'none';
+
+    // 2. Affiche l'écran de jeu actuel
+    const gameScreen = document.querySelector('.page');
+    if (gameScreen) gameScreen.style.display = 'flex';
+
+    // 3. (Optionnel) Feedback boss
+    const bossTxt = document.getElementById('bossText');
+    if (bossTxt) bossTxt.textContent = "Revenu ? Parfait. L'appartement ne va pas se meubler tout seul.";
+}
 </script>
 </body>
 </html>
