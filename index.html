@@ -42,10 +42,11 @@ body{font-family:'DM Mono',monospace;user-select:none;-webkit-user-select:none;c
     padding-bottom: 0;
 }
 .char-emoji img {
-    display: block; /* Supprime l'espace réservé aux lettres descendantes */
+    display: block;
     width: 110px; 
     height: auto;
-    margin-bottom: -1px; /* Petit hack pour mordre d'un pixel sur la charte et garantir le contact */
+    vertical-align: bottom; /* Aligne l'image sur le bas du flux */
+    margin-bottom: -10px;   /* Compense la transparence sous les pieds du boss */
 }
 .boss-bubble{flex:1;background:linear-gradient(135deg,#1a1a2e,#16213e);border:1px solid rgba(255,180,0,0.25);border-radius:0 12px 12px 12px;padding:10px 12px;font-size:11px;color:rgba(255,220,100,0.9);line-height:1.5;font-style:italic;}
 
@@ -154,7 +155,7 @@ body{font-family:'DM Mono',monospace;user-select:none;-webkit-user-select:none;c
         <div id="bankAmt" style="color: #ff9f1e; font-weight: bold; font-size: 14px; letter-spacing: 1px;">$1 000</div>
     </div> <div class="char-row">
         <div class="char-emoji" id="charEmoji">
-            <img src="images/b_notbad.png" style="width:110px; bottom:-10px; height:auto;">
+            <img src="images/b_notbad.png" style="width:110px; height:auto;">
         </div>
         <div class="boss-bubble">
             <span id="bossText">Tu te penses prêt pour ton premier jour ?</span>
@@ -328,9 +329,8 @@ btn.addEventListener("pointerdown", (e) => {
     
     btn.style.background = "radial-gradient(circle,#00ff94,#006635)";
     btn.style.boxShadow = "0 8px 0 #004d28";
+    document.getElementById("charEmoji").innerHTML = `<img src="${BOSS_SURPRISE}">`;
     
-    document.getElementById("charEmoji").innerHTML = `<img src="${BOSS_SURPRISE}" style="width:110px; bottom:-10px; height: auto; object-fit:contain; display:block;">`;
-
     function loop(t) {
         if (phase !== "holding") return;
         let dt = t - lastT;
@@ -379,11 +379,10 @@ btn.addEventListener("pointerup", () => {
     const charEl = document.getElementById("charEmoji");
     if (profit >= 0) {
         document.getElementById("bossText").textContent = BOSS_WIN[Math.floor(Math.random() * BOSS_WIN.length)];
-        charEl.innerHTML = `<img src="${BOSS_NOTBAD}" style="width:110px; bottom:-10px; height:auto; object-fit:contain; display:block;">`;
+        charEl.innerHTML = `<img src="${BOSS_NOTBAD}">`;    
     } else {
         document.getElementById("bossText").textContent = BOSS_LOSE_TXT[Math.floor(Math.random() * BOSS_LOSE_TXT.length)];
-        charEl.innerHTML = `<img src="${BOSS_LOSE}" style="width:110px; bottom:-10px; height:auto; object-fit:contain; display:block;">`;
-    }
+        charEl.innerHTML = `<img src="${BOSS_LOSE}">`;    }
     updateUI();
 });
 
@@ -393,7 +392,7 @@ function nextRound() {
     document.getElementById("resultBox").style.display = "none";
     btn.style.background = "radial-gradient(circle at 35% 30%,#ff2251 0%,#aa1535 60%,#660d20 100%)";
     btn.style.boxShadow = "0 8px 0 #4d0a18";
-    document.getElementById("charEmoji").innerHTML = `<img src="${BOSS_NOTBAD}" style="width:110px; height:110px; object-fit:contain; display:block;">`;
+    document.getElementById("charEmoji").innerHTML = `<img src="${BOSS_NOTBAD}">`;
     document.getElementById("bossText").textContent = "Prouve-moi que c'était pas un accident.";
     updateUI();
 }
