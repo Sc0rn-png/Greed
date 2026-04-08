@@ -380,10 +380,10 @@ btn.addEventListener("pointerup", () => {
     const charEl = document.getElementById("charEmoji");
     if (profit >= 0) {
         document.getElementById("bossText").textContent = BOSS_WIN[Math.floor(Math.random() * BOSS_WIN.length)];
-        charEl.innerHTML = `<img src="${BOSS_NOTBAD}" style="width:110px; height:110px; object-fit:contain; display:block;">`;
+        charEl.innerHTML = `<img src="${BOSS_NOTBAD}" style="width:110px; bottom:-10px; height:auto; object-fit:contain; display:block;">`;
     } else {
         document.getElementById("bossText").textContent = BOSS_LOSE_TXT[Math.floor(Math.random() * BOSS_LOSE_TXT.length)];
-        charEl.innerHTML = `<img src="${BOSS_LOSE}" style="width:110px; height:110px; object-fit:contain; display:block;">`;
+        charEl.innerHTML = `<img src="${BOSS_LOSE}" style="width:110px; bottom:-10px; height:auto; object-fit:contain; display:block;">`;
     }
     updateUI();
 });
