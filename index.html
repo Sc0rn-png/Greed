@@ -174,8 +174,10 @@ body{font-family:'DM Mono',monospace;user-select:none;-webkit-user-select:none;c
         <div class="char-emoji" id="charEmoji">
             <img src="images/b_notbad.png" style="width:110px; height:auto;">
         </div>
+        <div class="btn-wrap" id="holdBtn" style="display: none;">
+    </div>
         <div class="boss-bubble">
-            <span id="bossText">Tu te penses prêt pour ton premier jour ?</span>
+            <span id="bossText">Tu te penses prêt pour ton premier jour ici ? J'en ai vu un paquet de gars comme toi.</span>
         </div>
     </div>
     <div class="chart-box">
@@ -250,12 +252,12 @@ const story = [
     { img: 'images/story_2.jpg', text: "Je vivais enfin la vie dont j'avais rêvé." },
     { img: 'images/elipse_black.jpg', text: "Mais en un instant, j'ai tout perdu.", isElipse: true },
     { img: 'images/story_3.jpg', text: "J'ai vraiment merdé... la nouvelle s'est répandue tellement vite." },
-    { img: 'images/story_4.jpg', text: "Plus personne ne voulait de moi. Ni ma copine, ni mon boss, ni personne." },
+    { img: 'images/story_4.jpg', text: "Plus personne ne voulait entendre parler de moi. Ni ma copine, ni mon boss, ni personne." },
     { img: 'images/story_5.jpg', text: "J'avais l'impression de me perdre moi-même..." },
-    { img: 'images/story_6.jpg', text: "Comment je pourrais m'en sortir ? Mon compte affiche -90,000$." },
+    { img: 'images/story_6.jpg', text: "Comment je pourrais m'en sortir ? Comment gagner autant d'argent sans travail.. Je suis mort." },
     { img: 'images/elipse_black.jpg', text: "3 jours plus tard...", isElipse: true },
-    { img: 'images/story_7.jpg', text: "Le Boss Aigle... On dit qu'il rend millionnaire, mais que beaucoup ont sombré." },
-    { img: 'images/elipse_black.jpg', text: "Bon, je n'ai plus rien à perdre...", isElipse: true }
+    { img: 'images/story_7.jpg', text: "Monsieur Herald... On dit qu'il vous rend soit fou soit millionnaire." },
+    { img: 'images/elipse_black.jpg', text: "Bon, je n'ai pas vraiment d'autres choix...", isElipse: true }
 ];
 
 let currentSlide = 0;
@@ -273,7 +275,46 @@ function nextSlide() {
         updateUI();
     }
 }
+function nextSlide() {
+    currentSlide++;
+    
+    if (currentSlide < story.length) {
+        updateSlide();
+    } else {
+        // 1. On cache l'intro et on affiche le jeu
+        document.getElementById('introScreen').style.display = 'none';
+        document.getElementById('gameScreen').style.display = 'flex';
+        
+        // 2. On s'assure que le bouton de clic est BIEN CACHÉ au début
+        const playButton = document.getElementById('mainGameButton');
+        playButton.style.display = 'none';
 
+        // 3. On fait parler le Boss dans TA bulle existante
+        const bossBubble = document.querySelector('.boss-bubble');
+        const bossText = document.getElementById('bossText');
+        
+        bossBubble.style.display = 'block';
+        bossText.innerText = "Alors comme ça, on a besoin d'argent ? Montre-moi ce que tu vaux...";
+
+        // 4. Après 4 secondes, on change le texte et on affiche enfin le bouton
+        setTimeout(() => {
+            bossText.innerText = "Allez, AU BOULOT ! Clique sur ce graphique !";
+            
+            // On affiche le bouton de jeu avec une petite animation si tu veux
+            playButton.style.display = 'block';
+            
+            // Optionnel : On cache la bulle après 2 secondes de plus pour libérer l'écran
+            setTimeout(() => {
+                bossBubble.style.display = 'none';
+            }, 3000);
+
+        }, 4000);
+
+        // Initialisation du score
+        balance = -90000;
+        updateUI();
+    }
+}
 function updateSlide() {
     const slide = story[currentSlide];
     const imgEl = document.getElementById('introImage');
