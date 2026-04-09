@@ -248,9 +248,9 @@ body{font-family:'DM Mono',monospace;user-select:none;-webkit-user-select:none;c
 <script>
 const story = [
     { img: 'images/story_1.jpg', text: "Quelle soirée mémorable..." },
-    { img: 'images/story_2.jpg', text: "Je vivais enfin la vie dont j'avais rêvé." },
+    { img: 'images/story_2.jpg', text: "Je vivais enfin la vie dont j'avais toujours rêvé." },
     { img: 'images/elipse_black.jpg', text: "Mais en un instant, j'ai tout perdu.", isElipse: true },
-    { img: 'images/story_3.jpg', text: "J-j'ai merdé là.. je ne sais plus... qui je suis... m-mon nom ?", isMemoryLoss: true },
+    { img: 'images/story_3.jpg', text: "Là j'ai vraiment merdé. Je ne sais plus... qui je suis... m-mon nom ?", isMemoryLoss: true },
     { img: 'images/story_4.jpg', text: "Plus personne ne voulait entendre parler de moi. Ni ma copine, ni mon boss, ni personne." },
     { img: 'images/story_5.jpg', text: "J'avais l'impression de me perdre moi-même..." },
     { img: 'images/story_6.jpg', text: "Comment je pourrais m'en sortir ? Comment gagner autant d'argent sans travail.. Je suis mort." },
@@ -302,7 +302,7 @@ function nextSlide() {
         setTimeout(() => requestAnimationFrame(animateBank), 500);
 
         setTimeout(() => {
-            bossText.innerText = "Mais ne déconne pas avec, je n'aime pas les perdants. AU BOULOT !";
+            bossText.innerText = "Mais ne déconne pas avec, je n'aime pas perdre de l'argent. AU BOULOT !";
             if(playButton) playButton.style.display = 'flex';
         }, 4500);
     }
@@ -344,8 +344,8 @@ let history = [];
 let lastT = null;
 let rafId = null;
 
-const BOSS_WIN = ["Bien joué… pour une fois.", "Bravo ! Tu vois quand tu veux.", "Pas mal du tout."];
-const BOSS_LOSE_TXT = ["Aie... C'est de l'expérience, disons.", "J'aurais pas fait ça.", "C'était quoi le plan ?"];
+const BOSS_WIN = ["Bien joué… pour une fois.", "C'est pas si mal.", "Tu es au max de tes capacités là ?", "Pas mal du tout, pour un lapin"];
+const BOSS_LOSE_TXT = ["Aie... Je devrais peut-être arrêter de regarder.", "J'aurais pas fait ça, perso", "C'était quoi le plan ?", "Ma femme fais 10x mieux que toi.", "Je crois que ça va pas le faire.."];
 
 // --- MOTEUR D'OSCILLATION ---
 function createOsc() {
@@ -554,42 +554,41 @@ function updateSlide() {
 }
 
 function showLeaderboard() {
-    // Masquer le jeu principal
     document.querySelector('.page').style.display = 'none';
+    document.getElementById('apartmentScreen').style.display = 'block';
     
-    // On réutilise ton écran d'appartement mais renommé (ou change l'ID dans ton HTML)
-    const board = document.getElementById('apartmentScreen'); 
-    board.style.display = 'block';
+    const container = document.getElementById('leaderboardContent');
     
-    // On change le titre dynamiquement
-    const title = board.querySelector('.logo') || {innerText: ""};
-    title.innerText = "CLASSEMENT AVRIL";
+    // On génère le classement
+    const scores = [
+        { name: "HERALD_BOSS 👑", score: 850230 },
+        { name: (playerName || "Toi") + " (YOU)", score: Math.floor(bank) },
+        { name: "KROOS_44", score: 12400 },
+        { name: "S_JOBS_GHOST", score: 8500 },
+        { name: "TRADER_DU_DIMANCHE", score: 1200 }
+    ].sort((a, b) => b.score - a.score);
 
-    // Simulation des scores pour le design
-    const container = board.querySelector('.chart-box') || board; 
     container.innerHTML = `
-        <div style="padding: 20px; font-family: 'DM Mono', monospace;">
-            <div style="display:flex; justify-content:space-between; margin-bottom:15px; color:#ffdd00; font-size:12px;">
+        <div style="padding: 15px; font-family: 'DM Mono', monospace;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:15px; color:rgba(255,160,30,0.6); font-size:9px; letter-spacing:1px;">
                 <span>JOUEUR</span><span>SOLDE</span>
             </div>
-            <div style="display:flex; flex-direction:column; gap:12px;">
-                <div style="display:flex; justify-content:space-between; border-bottom:1px solid #222; padding-bottom:5px;">
-                    <span>1. HERALD_BOSS 👑</span><span style="color:#00ff94;">$850,230</span>
-                </div>
-                <div style="display:flex; justify-content:space-between; border-bottom:1px solid #222; padding-bottom:5px; color:#00ff94; background:rgba(0,255,148,0.05);">
-                    <span>2. ${playerName || "Toi"} (YOU)</span><span style="color:#00ff94;">$${Math.floor(bank).toLocaleString()}</span>
-                </div>
-                <div style="display:flex; justify-content:space-between; border-bottom:1px solid #222; padding-bottom:5px;">
-                    <span>3. KROOS_44</span><span style="color:#00ff94;">$12,400</span>
-                </div>
+            <div style="display:flex; flex-direction:column; gap:8px;">
+                ${scores.map((s, i) => `
+                    <div style="display:flex; justify-content:space-between; align-items:center; padding:10px; border-radius:4px; background:${s.name.includes("(YOU)") ? 'rgba(0,255,148,0.1)' : 'transparent'}; border-bottom:1px solid rgba(255,255,255,0.03);">
+                        <span style="font-size:11px; color:${i < 3 ? '#ffaa1e' : '#fff'}">${i+1}. ${s.name}</span>
+                        <span style="color:#00ff94; font-size:11px;">$${s.score.toLocaleString()}</span>
+                    </div>
+                `).join('')}
             </div>
-            <p style="margin-top:30px; font-size:10px; color:gray; text-align:center;">
-                Réinitialisation dans 21 jours. <br> Top 3 récompensé.
-            </p>
+            <div style="margin-top:25px; padding:15px; border:1px dashed rgba(255,160,30,0.2); text-align:center;">
+                <p style="color:#ffdd00; font-size:10px; margin-bottom:5px;">🏆 RÉCOMPENSES DU MOIS</p>
+                <p style="font-size:9px; color:rgba(255,255,255,0.5);">Top 3 : Gains réels envoyés le 30.</p>
+            </div>
         </div>
     `;
 }
-
+    
 function showGameScreen() {
     document.getElementById('apartmentScreen').style.display = 'none';
     document.querySelector('.page').style.display = 'flex';
