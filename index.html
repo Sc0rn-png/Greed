@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-<title>GREED - Arcade Edition</title>
+<title>GREED Life</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
 <style>
 /* --- STYLES ORIGINAUX (CONSERVÉS) --- */
@@ -540,14 +540,12 @@ function updateSlide() {
 }
 
 function showLeaderboard() {
-    console.log("Clic sur Classement détecté"); // Pour vérifier dans la console
-    
-    // 1. On identifie les deux écrans
+    // 1. On pointe sur le NOUVEL ID "leaderboardScreen"
+    const boardPage = document.getElementById('leaderboardScreen');
     const gamePage = document.querySelector('.page');
-    const boardPage = document.getElementById('apartmentScreen');
 
     if (!boardPage) {
-        alert("Erreur : L'élément 'apartmentScreen' est introuvable dans le HTML");
+        console.error("L'élément leaderboardScreen est introuvable !");
         return;
     }
 
@@ -555,39 +553,50 @@ function showLeaderboard() {
     gamePage.style.display = 'none';
     boardPage.style.display = 'block';
 
-    // 3. On remplit le contenu proprement
+    // 3. On génère le contenu
+    const scores = [
+        { name: "HERALD_BOSS 👑", score: 850230 },
+        { name: (playerName || "L'Anonyme") + " (YOU)", score: Math.floor(bank) },
+        { name: "KROOS_44", score: 12400 },
+        { name: "S_JOBS_GHOST", score: 8500 },
+        { name: "TRADER_DU_DIMANCHE", score: 1200 }
+    ].sort((a, b) => b.score - a.score);
+
     boardPage.innerHTML = `
-        <div style="padding:20px; background:#0d0a06; min-height:100vh;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <button onclick="showGameScreen()" style="background:none; border:1px solid #ffaa1e; color:#ffaa1e; padding:5px 10px; font-family:'DM Mono'; cursor:pointer;">
-                    ◀ RETOUR
+        <div style="background:#0d0a06; min-height:100vh; padding:20px; color:white; font-family:'DM Mono', monospace;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom:10px; border-bottom:1px solid rgba(255, 160, 30, 0.2);">
+                <button onclick="showGameScreen()" style="background:none; border:1px solid #ffaa1e; color:#ffaa1e; padding:5px 12px; cursor:pointer; font-size:10px; font-family:'DM Mono';">
+                    ◀ RETOUR TRAVAIL
                 </button>
-                <div style="color:#ffaa1e; font-size:10px; letter-spacing:2px;">CLASSEMENT AVRIL</div>
+                <div style="font-size:10px; letter-spacing:2px; color:#ffaa1e;">CLASSEMENT AVRIL</div>
             </div>
-            
-            <div class="chart-box" style="padding:15px; background:rgba(255,160,30,0.05); border:1px solid rgba(255,160,30,0.1);">
-                <div style="display:flex; justify-content:space-between; color:gray; font-size:9px; margin-bottom:10px;">
+
+            <div style="background:rgba(255,160,30,0.03); border:1px solid rgba(255,160,30,0.1); border-radius:8px; padding:15px;">
+                <div style="display:flex; justify-content:space-between; color:rgba(255,255,255,0.4); font-size:9px; margin-bottom:15px;">
                     <span>JOUEUR</span><span>SOLDE</span>
                 </div>
-                <div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid #222;">
-                    <span>1. HERALD_BOSS 👑</span><span style="color:#00ff94;">$850,230</span>
-                </div>
-                <div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid #222; color:#00ff94;">
-                    <span>2. ${playerName || "Toi"} (YOU)</span><span>$${Math.floor(bank).toLocaleString()}</span>
-                </div>
-                <div style="display:flex; justify-content:space-between; padding:10px 0;">
-                    <span>3. KROOS_44</span><span style="color:#00ff94;">$12,400</span>
+                
+                <div style="display:flex; flex-direction:column; gap:12px;">
+                    ${scores.map((s, i) => `
+                        <div style="display:flex; justify-content:space-between; padding-bottom:8px; border-bottom:1px solid #222; ${s.name.includes("(YOU)") ? 'color:#00ff94; font-weight:bold;' : ''}">
+                            <span>${i+1}. ${s.name}</span>
+                            <span>$${s.score.toLocaleString()}</span>
+                        </div>
+                    `).join('')}
                 </div>
             </div>
         </div>
     `;
 }
 
+// N'oublie pas de mettre à jour aussi la fonction de retour !
 function showGameScreen() {
-    document.getElementById('apartmentScreen').style.display = 'none';
-    document.querySelector('.page').style.display = 'flex';
+    const boardPage = document.getElementById('leaderboardScreen');
+    const gamePage = document.querySelector('.page');
+    
+    if(boardPage) boardPage.style.display = 'none';
+    if(gamePage) gamePage.style.display = 'flex';
 }
-
 document.getElementById("speedSlider").addEventListener("input", updateSliderPos);
 updateSliderPos();
 updateUI();
