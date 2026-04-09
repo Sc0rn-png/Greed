@@ -482,8 +482,8 @@ btn.addEventListener("pointerup", () => {
     const profit = Math.floor(gaugeVal * (bank * (speedPct / 100)));
     bank += profit;
     
-    document.getElementById("btnWrap").style.display = "none";
-    document.getElementById("resultBox").style.display = "block";
+document.getElementById("mainGameButton").style.display = "none"; // On cache le bouton de jeu
+document.getElementById("resultBox").style.display = "block";    // On montre le bouton REJOUER
     
     const charEl = document.getElementById("charEmoji");
     if (profit >= 0) {
