@@ -140,6 +140,40 @@ body{font-family:'DM Mono',monospace;user-select:none;-webkit-user-select:none;c
 
 /* RÉSULTATS */
 #resultBox{display:none;animation:slideUp 0.3s ease;}
+/* Animation de la notification de succès */
+#achiev {
+    position: fixed;
+    top: -100px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 11000;
+    transition: top 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+#achiev.show { top: 20px; }
+#achInner { background: #1a1a1a; border: 1px solid #ffaa1e; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+
+/* Conteneur des badges sous la topbar */
+.badge-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+    min-height: 24px;
+}
+.badge {
+    font-size: 14px;
+    opacity: 0.15; /* Grisé par défaut */
+    filter: grayscale(1);
+    transition: all 0.5s ease;
+    background: rgba(255,255,255,0.05);
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+.badge.unlocked {
+    opacity: 1;
+    filter: grayscale(0);
+    background: rgba(255,160,30,0.1);
+    box-shadow: 0 0 10px rgba(255,160,30,0.2);
+}
 .arcade-btn{width:100%;padding:16px 0;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:5px;background:rgba(255,160,30,0.1);border:2px solid #ff9f1e;color:#ff9f1e;border-radius:6px;cursor:pointer;margin-top:10px;}
 </style>
 </head>
@@ -185,7 +219,27 @@ body{font-family:'DM Mono',monospace;user-select:none;-webkit-user-select:none;c
             <div style="font-size: 7px; color: rgba(255,255,255,0.3); letter-spacing: 1px; margin-bottom: 2px; text-transform: uppercase;">Banque</div>
             <div id="bankAmt" style="color: #ff9f1e; font-weight: bold; font-size: 14px; letter-spacing: 1px;">$1 000</div>
         </div>
-    </div> <div class="char-row">
+    </div>
+    <div class="badge-row">
+        <span id="badge-10k" class="badge" title="10.000$">💵</span>
+        <span id="badge-25k" class="badge" title="25.000$">💰</span>
+        <span id="badge-50k" class="badge" title="50.000$">💎</span>
+        <span id="badge-100k" class="badge" title="100.000$">👑</span>
+    </div>
+    
+    </div>
+
+<div id="achiev">
+  <div id="achInner">
+    <div id="achEmoji"></div>
+    <div>
+      <div id="achTag" style="color:#ffaa1e;">SUCCÈS DÉBLOQUÉ</div>
+      <div id="achLabel"></div>
+      <div id="achDesc"></div>
+    </div>
+  </div>
+</div>
+    <div class="char-row">
         <div class="char-emoji" id="charEmoji">
             <img src="images/b_notbad.png" style="width:110px; height:auto;">
         </div>
@@ -389,6 +443,7 @@ function updateUI() {
     } else {
         bankEl.style.color = "#ffffff"; 
     }
+checkAchievements(); 
 }
 
 function updateSliderPos() {
@@ -647,6 +702,7 @@ function showGameOver() {
 }
 
 function restartGame() {
+    resetAchievements();
     // 1. Reset des variables
     bank = 0;
     gameOverCount = 0;
@@ -661,6 +717,50 @@ function restartGame() {
     document.getElementById('introScreen').style.display = 'flex';
     
     updateSlide();
+}
+// Liste des succès
+const achievements = [
+    { id: '10k', threshold: 10000, label: "Petit Joueur", desc: "Atteindre 10.000$", emoji: "💵" },
+    { id: '25k', threshold: 25000, label: "Trader Émergent", desc: "Atteindre 25.000$", emoji: "💰" },
+    { id: '50k', threshold: 50000, label: "Requin des Finances", desc: "Atteindre 50.000$", emoji: "🏦" },
+    { id: '100k', threshold: 100000, label: "Héritier de Herald", desc: "Atteindre 100.000$", emoji: "👑" }
+];
+
+let unlockedAchievements = [];
+
+function checkAchievements() {
+    achievements.forEach(ach => {
+        if (bank >= ach.threshold && !unlockedAchievements.includes(ach.id)) {
+            unlockAchievement(ach);
+        }
+    });
+}
+
+function unlockAchievement(ach) {
+    unlockedAchievements.push(ach.id);
+    
+    // Activer le badge visuel
+    const badge = document.getElementById(`badge-${ach.id}`);
+    if(badge) badge.classList.add('unlocked');
+
+    // Afficher la notification
+    document.getElementById('achEmoji').innerText = ach.emoji;
+    document.getElementById('achLabel').innerText = ach.label;
+    document.getElementById('achDesc').innerText = ach.desc;
+    
+    const panel = document.getElementById('achiev');
+    panel.classList.add('show');
+    
+    setTimeout(() => { panel.classList.remove('show'); }, 4000);
+}
+
+// MODIFICATION DU RESTART (Pour tout supprimer en cas de Game Over)
+function resetAchievements() {
+    unlockedAchievements = [];
+    achievements.forEach(ach => {
+        const badge = document.getElementById(`badge-${ach.id}`);
+        if(badge) badge.classList.remove('unlocked');
+    });
 }
 </script>
 </body>
