@@ -174,8 +174,9 @@ body{font-family:'DM Mono',monospace;user-select:none;-webkit-user-select:none;c
         <div class="char-emoji" id="charEmoji">
             <img src="images/b_notbad.png" style="width:110px; height:auto;">
         </div>
-        <div class="btn-wrap" id="holdBtn" style="display: none;">
-    </div>
+        <div class="btn-wrap" id="mainGameButton">
+    <button id="holdBtn">JOUER</button>
+</div>
         <div class="boss-bubble">
             <span id="bossText">Tu te penses prêt pour ton premier jour ici ? J'en ai vu un paquet de gars comme toi.</span>
         </div>
@@ -261,6 +262,21 @@ const story = [
 ];
 
 let currentSlide = 0;
+let balance = -90000; // On commence avec la dette
+
+function updateSlide() {
+    const slide = story[currentSlide];
+    const imgEl = document.getElementById('introImage');
+    const textEl = document.getElementById('introText');
+    
+    textEl.style.opacity = 0;
+    setTimeout(() => {
+        imgEl.src = slide.img;
+        textEl.innerText = slide.text;
+        textEl.style.opacity = 1;
+        imgEl.style.filter = slide.isElipse ? "brightness(0.3)" : "none";
+    }, 200);
+}
 
 function nextSlide() {
     currentSlide++;
@@ -268,53 +284,31 @@ function nextSlide() {
     if (currentSlide < story.length) {
         updateSlide();
     } else {
-        // Fin de l'histoire, on lance le jeu
+        // 1. On cache l'intro
         document.getElementById('introScreen').style.display = 'none';
-        // Ici, on s'assure que le solde de départ est bien de -90000
-        balance = -90000; 
-        updateUI();
-    }
-}
-function nextSlide() {
-    currentSlide++;
-    
-    if (currentSlide < story.length) {
-        updateSlide();
-    } else {
-        // 1. On cache l'intro et on affiche le jeu
-        document.getElementById('introScreen').style.display = 'none';
-        document.getElementById('gameScreen').style.display = 'flex';
         
-        // 2. On s'assure que le bouton de clic est BIEN CACHÉ au début
+        // 2. On cache le bouton de jeu au début de la rencontre
         const playButton = document.getElementById('mainGameButton');
         playButton.style.display = 'none';
 
-        // 3. On fait parler le Boss dans TA bulle existante
-        const bossBubble = document.querySelector('.boss-bubble');
+        // 3. Le Boss parle
         const bossText = document.getElementById('bossText');
-        
-        bossBubble.style.display = 'block';
         bossText.innerText = "Alors comme ça, on a besoin d'argent ? Montre-moi ce que tu vaux...";
 
-        // 4. Après 4 secondes, on change le texte et on affiche enfin le bouton
+        // 4. Après 3.5 secondes, il donne l'ordre de bosser
         setTimeout(() => {
-            bossText.innerText = "Allez, AU BOULOT ! Clique sur ce graphique !";
-            
-            // On affiche le bouton de jeu avec une petite animation si tu veux
-            playButton.style.display = 'block';
-            
-            // Optionnel : On cache la bulle après 2 secondes de plus pour libérer l'écran
-            setTimeout(() => {
-                bossBubble.style.display = 'none';
-            }, 3000);
+            bossText.innerText = "Allez, AU BOULOT ! Clique sur ce bouton !";
+            playButton.style.display = 'flex'; // On affiche le bouton
+        }, 3500);
 
-        }, 4000);
-
-        // Initialisation du score
-        balance = -90000;
+        // Mise à jour du solde ($ -90,000)
+        bank = -90000;
         updateUI();
     }
 }
+
+// Initialise la première image au chargement
+updateSlide();
 function updateSlide() {
     const slide = story[currentSlide];
     const imgEl = document.getElementById('introImage');
