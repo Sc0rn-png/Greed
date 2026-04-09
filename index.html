@@ -140,69 +140,41 @@ body{font-family:'DM Mono',monospace;user-select:none;-webkit-user-select:none;c
 
 /* RÉSULTATS */
 #resultBox{display:none;animation:slideUp 0.3s ease;}
-/* Animation de la notification de succès */
-#achiev {
-    position: fixed;
-    top: -100px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 11000;
-    transition: top 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-#achiev.show { top: 20px; }
-#achInner { background: #1a1a1a; border: 1px solid #ffaa1e; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-
-/* Conteneur des badges sous la topbar */
-.badge-row {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 10px;
-    min-height: 24px;
-}
-.badge {
-    font-size: 14px;
-    opacity: 0.15; /* Grisé par défaut */
-    filter: grayscale(1);
-    transition: all 0.5s ease;
-    background: rgba(255,255,255,0.05);
-    padding: 2px 6px;
-    border-radius: 4px;
-}
-.badge.unlocked {
-    opacity: 1;
-    filter: grayscale(0);
-    background: rgba(255,160,30,0.1);
-    box-shadow: 0 0 10px rgba(255,160,30,0.2);
-}
 .arcade-btn{width:100%;padding:16px 0;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:5px;background:rgba(255,160,30,0.1);border:2px solid #ff9f1e;color:#ff9f1e;border-radius:6px;cursor:pointer;margin-top:10px;}
 </style>
 </head>
 <body>
 <div id="introScreen" style="position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; font-family: 'DM Mono', monospace;">
+    
     <div id="introContent" style="width: 100%; max-width: 400px; display: flex; flex-direction: column; align-items: center;">
-
+        
         <div style="width: 85%; height: 65vh; border-radius: 16px; overflow: hidden; border: 1px solid rgba(255, 160, 30, 0.4); background: #0d0a06; margin-bottom: 20px; box-shadow: 0 0 20px rgba(255,160,30,0.1);">
             <img id="introImage" src="" style="width: 100%; height: 100%; object-fit: cover; display: block;">
         </div>
-
+        
         <div style="width: 100%; min-height: 80px; display: flex; align-items: center; justify-content: center;">
             <p id="introText" style="color: #eee; font-size: 15px; line-height: 1.5; text-align: center; margin: 0; padding: 0 10px; transition: opacity 0.3s;"></p>
         </div>
-
-        <button onclick="nextSlide()" style="margin-top: 30px; background: #ff9f1e; color: #000; border: none; padding: 14px 40px; border-radius: 8px; font-weight: bold; cursor: pointer; font-family: 'DM Mono'; text-transform: uppercase; letter-spacing: 1px;">SUIVANT</button>
+        
+        <button onclick="nextSlide()" style="margin-top: 30px; background: #ff9f1e; color: #000; border: none; padding: 14px 40px; border-radius: 8px; font-weight: bold; cursor: pointer; font-family: 'DM Mono'; text-transform: uppercase; letter-spacing: 1px;">
+            SUIVANT
+        </button>
+        
     </div>
 </div>
-
 <div id="gameOverScreen" style="display:none; position:fixed; inset:0; background:#000; z-index:10000; flex-direction:column; align-items:center; justify-content:center; padding:20px; text-align:center; font-family:'DM Mono';">
+    
     <div style="width:95%; max-width:400px; border-radius:20px; border:2px solid #ff2251; overflow:hidden; margin-bottom:30px; box-shadow: 0 0 35px rgba(255,34,81,0.5); line-height:0;">
         <img src="images/game_over.jpeg" style="width:100%; height:auto; display:block; object-fit:cover;">
     </div>
 
     <h1 style="color:#ff2251; font-size:28px; letter-spacing:6px; margin-bottom:15px; text-shadow: 0 0 10px rgba(255,34,81,0.5);">GAME OVER</h1>
     <p style="color:#666; font-size:11px; margin-bottom:40px; line-height:1.6; max-width:280px;">"Je t'avais prévenu... On ne joue pas avec mon argent."</p>
-    <button onclick="restartGame()" class="arcade-btn" style="width:220px; border:2px solid #ff2251; color:#ff2251; background:rgba(255,34,81,0.05); letter-spacing:3px; padding:15px; cursor:pointer; font-family:'DM Mono'; transition: 0.3s;">RÉESSAYER</button>
+    
+    <button onclick="restartGame()" class="arcade-btn" style="width:220px; border:2px solid #ff2251; color:#ff2251; background:rgba(255,34,81,0.05); letter-spacing:3px; padding:15px; cursor:pointer; font-family:'DM Mono'; transition: 0.3s;">
+        RÉESSAYER
+    </button>
 </div>
-
 <div class="page">
     <div class="topbar" style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 10px; margin-bottom: 10px; border-bottom: 1px solid rgba(255, 160, 30, 0.2);">
         <button onclick="showLeaderboard()" style="background: none; border: none; cursor: pointer; display: flex; align-items: center; gap: 8px; padding: 0;">
@@ -213,23 +185,6 @@ body{font-family:'DM Mono',monospace;user-select:none;-webkit-user-select:none;c
             <div style="font-size: 7px; color: rgba(255,255,255,0.3); letter-spacing: 1px; margin-bottom: 2px; text-transform: uppercase;">Banque</div>
             <div id="bankAmt" style="color: #ff9f1e; font-weight: bold; font-size: 14px; letter-spacing: 1px;">$1 000</div>
         </div>
-    </div>
-
-    <div class="badge-row" style="display: flex; justify-content: center; gap: 15px; background: rgba(255,160,30,0.05); padding: 8px 20px; border-radius: 12px; border: 1px solid rgba(255,160,30,0.1); margin-bottom: 20px;">
-        <span id="badge-10k" class="badge" title="10.000$" style="opacity:0.1; filter:grayscale(1);">💵</span>
-        <span id="badge-25k" class="badge" title="25.000$" style="opacity:0.1; filter:grayscale(1);">💰</span>
-        <span id="badge-50k" class="badge" title="50.000$" style="opacity:0.1; filter:grayscale(1);">💎</span>
-        <span id="badge-100k" class="badge" title="100.000$" style="opacity:0.1; filter:grayscale(1);">👑</span>
-    </div>
-
-    <div id="achiev" style="display:none;"> <div id="achInner">
-        <div id="achEmoji"></div>
-        <div>
-          <div id="achTag" style="color:#ffaa1e;">SUCCÈS DÉBLOQUÉ</div>
-          <div id="achLabel"></div>
-          <div id="achDesc"></div>
-        </div>
-      </div>
     </div> <div class="char-row">
         <div class="char-emoji" id="charEmoji">
             <img src="images/b_notbad.png" style="width:110px; height:auto;">
@@ -237,7 +192,6 @@ body{font-family:'DM Mono',monospace;user-select:none;-webkit-user-select:none;c
         <div class="boss-bubble">
             <span id="bossText">Tu te penses prêt pour ton premier jour ici ? J'en ai vu un paquet de gars comme toi.</span>
         </div>
-
     </div>
     <div class="chart-box">
         <div class="chart-midline" style="margin-top: 0;"></div>
@@ -274,7 +228,9 @@ body{font-family:'DM Mono',monospace;user-select:none;-webkit-user-select:none;c
                 <span class="speed-val" id="speedVal">30%</span>
             </div>
         </div>
+        
         <input type="range" id="speedSlider" min="10" max="100" value="30" oninput="updateSliderPos()">
+        
         <div class="speed-footer">
             <span>LENT</span>
             <span>NORMAL</span>
@@ -285,7 +241,7 @@ body{font-family:'DM Mono',monospace;user-select:none;-webkit-user-select:none;c
   <div class="btn-wrap" id="mainGameButton">
     <button id="holdBtn">JOUER</button>
 </div>
-
+    
     <div id="resultBox" style="display:none;">
         <button class="arcade-btn" onclick="nextRound()">▶ REJOUER </button>
     </div>
@@ -433,7 +389,6 @@ function updateUI() {
     } else {
         bankEl.style.color = "#ffffff"; 
     }
-checkAchievements(); 
 }
 
 function updateSliderPos() {
@@ -692,7 +647,6 @@ function showGameOver() {
 }
 
 function restartGame() {
-    resetAchievements();
     // 1. Reset des variables
     bank = 0;
     gameOverCount = 0;
@@ -707,50 +661,6 @@ function restartGame() {
     document.getElementById('introScreen').style.display = 'flex';
     
     updateSlide();
-}
-// Liste des succès
-const achievements = [
-    { id: '10k', threshold: 10000, label: "Petit Joueur", desc: "Atteindre 10.000$", emoji: "💵" },
-    { id: '25k', threshold: 25000, label: "Trader Émergent", desc: "Atteindre 25.000$", emoji: "💰" },
-    { id: '50k', threshold: 50000, label: "Requin des Finances", desc: "Atteindre 50.000$", emoji: "🏦" },
-    { id: '100k', threshold: 100000, label: "Héritier de Herald", desc: "Atteindre 100.000$", emoji: "👑" }
-];
-
-let unlockedAchievements = [];
-
-function checkAchievements() {
-    achievements.forEach(ach => {
-        if (bank >= ach.threshold && !unlockedAchievements.includes(ach.id)) {
-            unlockAchievement(ach);
-        }
-    });
-}
-
-function unlockAchievement(ach) {
-    unlockedAchievements.push(ach.id);
-    
-    // Activer le badge visuel
-    const badge = document.getElementById(`badge-${ach.id}`);
-    if(badge) badge.classList.add('unlocked');
-
-    // Afficher la notification
-    document.getElementById('achEmoji').innerText = ach.emoji;
-    document.getElementById('achLabel').innerText = ach.label;
-    document.getElementById('achDesc').innerText = ach.desc;
-    
-    const panel = document.getElementById('achiev');
-    panel.classList.add('show');
-    
-    setTimeout(() => { panel.classList.remove('show'); }, 4000);
-}
-
-// MODIFICATION DU RESTART (Pour tout supprimer en cas de Game Over)
-function resetAchievements() {
-    unlockedAchievements = [];
-    achievements.forEach(ach => {
-        const badge = document.getElementById(`badge-${ach.id}`);
-        if(badge) badge.classList.remove('unlocked');
-    });
 }
 </script>
 </body>
