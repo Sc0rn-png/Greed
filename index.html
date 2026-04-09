@@ -259,7 +259,6 @@ const story = [
 ];
 
 let currentSlide = 0;
-let balance = -90000; // On commence avec la dette
 
 function updateSlide() {
     const slide = story[currentSlide];
@@ -281,27 +280,46 @@ function nextSlide() {
     if (currentSlide < story.length) {
         updateSlide();
     } else {
-        // 1. On cache l'intro
-        document.getElementById('introScreen').style.display = 'none';
+    // 1. Initialisation de l'écran de jeu
+    document.getElementById('introScreen').style.display = 'none';
+    const playButton = document.getElementById('mainGameButton');
+    playButton.style.display = 'none';
+    
+    // On part de zéro pour l'animation
+    bank = 0; 
+    updateUI();
+
+    const bossText = document.getElementById('bossText');
+    bossText.innerText = "Tiens, voilà 1 000$. Je t'en fais cadeau pour voir ce que tu vaux...";
+
+    // 2. ANIMATION DU COMPTEUR (0 à 1000)
+    let count = 0;
+    const duration = 2000; // L'animation dure 2 secondes
+    const startTime = performance.now();
+
+    function animateBank(currentTime) {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
         
-        // 2. On cache le bouton de jeu au début de la rencontre
-        const playButton = document.getElementById('mainGameButton');
-        playButton.style.display = 'none';
-
-        // 3. Le Boss parle
-        const bossText = document.getElementById('bossText');
-        bossText.innerText = "Alors comme ça, on a besoin d'argent ? Montre-moi ce que tu vaux...";
-
-        // 4. Après 3.5 secondes, il donne l'ordre de bosser
-        setTimeout(() => {
-            bossText.innerText = "Allez, AU BOULOT ! Clique sur ce bouton !";
-            playButton.style.display = 'flex'; // On affiche le bouton
-        }, 3500);
-
-        // Mise à jour du solde ($ -90,000)
-        bank = -90000;
+        // Calcul du montant actuel
+        bank = Math.floor(progress * 1000);
         updateUI();
+
+        if (progress < 1) {
+            requestAnimationFrame(animateBank);
+        }
     }
+    
+    // On lance l'animation après un petit délai (500ms) pour que le joueur lise le début
+    setTimeout(() => {
+        requestAnimationFrame(animateBank);
+    }, 500);
+
+    // 3. Changement du texte et apparition du bouton
+    setTimeout(() => {
+        bossText.innerText = "Mais ne déconne pas avec, je n'aime pas les perdants. AU BOULOT !";
+        playButton.style.display = 'flex';
+    }, 4500);
 }
 
 // Initialise la première image au chargement
