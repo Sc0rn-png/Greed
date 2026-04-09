@@ -144,7 +144,20 @@ body{font-family:'DM Mono',monospace;user-select:none;-webkit-user-select:none;c
 </style>
 </head>
 <body>
-
+<div id="introScreen" style="position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; font-family: 'DM Mono', monospace;">
+    
+    <div id="introContent" style="width: 100%; max-width: 400px; text-align: center;">
+        <div style="width: 100%; height: 300px; border-radius: 12px; overflow: hidden; border: 1px solid rgba(255, 160, 30, 0.3); background: #0d0a06; margin-bottom: 20px;">
+            <img id="introImage" src="" style="width: 100%; height: 100%; object-fit: cover;">
+        </div>
+        
+        <p id="introText" style="color: #eee; font-size: 14px; line-height: 1.6; min-height: 60px; margin-bottom: 30px;"></p>
+        
+        <button onclick="nextSlide()" style="background: #ff9f1e; color: #000; border: none; padding: 12px 30px; border-radius: 4px; font-weight: bold; cursor: pointer; font-family: 'DM Mono';">
+            SUIVANT
+        </button>
+    </div>
+</div>
 <div class="page">
     <div class="topbar" style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 10px; margin-bottom: 10px; border-bottom: 1px solid rgba(255, 160, 30, 0.2);">
         <button onclick="showApartmentScreen()" style="background: none; border: none; cursor: pointer; display: flex; align-items: center; gap: 8px; padding: 0;">
@@ -228,6 +241,54 @@ body{font-family:'DM Mono',monospace;user-select:none;-webkit-user-select:none;c
 </div>
 </div>
 <script>
+const story = [
+    { img: 'images/story_1.jpg', text: "Quelle soirée mémorable..." },
+    { img: 'images/story_2.jpg', text: "Je vivais enfin la vie dont j'avais rêvé." },
+    { img: 'images/elipse_black.jpg', text: "Mais en un instant, j'ai tout perdu.", isElipse: true },
+    { img: 'images/story_3.jpg', text: "J'ai vraiment merdé... la nouvelle s'est répandue tellement vite." },
+    { img: 'images/story_4.jpg', text: "Plus personne ne voulait de moi. Ni ma copine, ni mon boss, ni personne." },
+    { img: 'images/story_5.jpg', text: "J'avais l'impression de me perdre moi-même..." },
+    { img: 'images/story_6.jpg', text: "Comment je pourrais m'en sortir ? Mon compte affiche -90,000$." },
+    { img: 'images/elipse_black.jpg', text: "3 jours plus tard...", isElipse: true },
+    { img: 'images/story_7.jpg', text: "Le Boss Aigle... On dit qu'il rend millionnaire, mais que beaucoup ont sombré." },
+    { img: 'images/elipse_black.jpg', text: "Bon, je n'ai plus rien à perdre...", isElipse: true }
+];
+
+let currentSlide = 0;
+
+function nextSlide() {
+    currentSlide++;
+    
+    if (currentSlide < story.length) {
+        updateSlide();
+    } else {
+        // Fin de l'histoire, on lance le jeu
+        document.getElementById('introScreen').style.display = 'none';
+        // Ici, on s'assure que le solde de départ est bien de -90000
+        balance = -90000; 
+        updateUI();
+    }
+}
+
+function updateSlide() {
+    const slide = story[currentSlide];
+    const imgEl = document.getElementById('introImage');
+    const textEl = document.getElementById('introText');
+    
+    // Animation simple de fondu
+    textEl.style.opacity = 0;
+    setTimeout(() => {
+        imgEl.src = slide.img;
+        textEl.innerText = slide.text;
+        textEl.style.opacity = 1;
+        
+        // Style spécial pour les ellipses (fond noir par exemple)
+        imgEl.style.filter = slide.isElipse ? "brightness(0.3)" : "none";
+    }, 200);
+}
+
+// Lancer la première slide au démarrage
+updateSlide();
 // --- CONFIGURATION DES IMAGES ---
 const IMG_PATH = "images/";
 const BOSS_SURPRISE = IMG_PATH + "b_surprise.png";
